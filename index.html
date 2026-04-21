@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0a0606" />
+  <title>Dragon Math · Pordee</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Uncial+Antiqua&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Animated background -->
+  <div class="bg-layer bg-embers" aria-hidden="true"></div>
+  <div class="bg-layer bg-grain" aria-hidden="true"></div>
+
+  <main id="app">
+    <!-- ========== HOME SCREEN ========== -->
+    <section id="screen-home" class="screen active">
+      <div class="hero">
+        <div class="hero-crest">🐉</div>
+        <h1 class="hero-title">Dragon Math</h1>
+        <p class="hero-sub">The Lair of <span id="player-name">Pordee</span></p>
+      </div>
+
+      <div class="stats-strip">
+        <div class="stat">
+          <span class="stat-icon">🪙</span>
+          <span class="stat-value" id="home-coins">0</span>
+          <span class="stat-label">Gold</span>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">🐲</span>
+          <span class="stat-value" id="home-dragons">0</span>
+          <span class="stat-label">Dragons</span>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">🏯</span>
+          <span class="stat-value" id="home-floor">1</span>
+          <span class="stat-label">Tower</span>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <button class="menu-card" data-nav="practice">
+          <span class="menu-icon">⚔️</span>
+          <span class="menu-title">Train</span>
+          <span class="menu-desc">Sharpen your mind</span>
+        </button>
+        <button class="menu-card menu-card-primary" data-nav="battle">
+          <span class="menu-icon">🏯</span>
+          <span class="menu-title">Dragon Tower</span>
+          <span class="menu-desc">Battle · Floor <span id="menu-floor">1</span></span>
+        </button>
+        <button class="menu-card" data-nav="shop">
+          <span class="menu-icon">🔥</span>
+          <span class="menu-title">Shop</span>
+          <span class="menu-desc">Summon dragons</span>
+        </button>
+        <button class="menu-card" data-nav="hoard">
+          <span class="menu-icon">💎</span>
+          <span class="menu-title">Hoard</span>
+          <span class="menu-desc">Your collection</span>
+        </button>
+      </nav>
+
+      <div class="home-foot">
+        <button class="text-btn" id="reset-btn">Reset progress</button>
+      </div>
+    </section>
+
+    <!-- ========== PRACTICE SETUP ========== -->
+    <section id="screen-practice" class="screen">
+      <header class="screen-header">
+        <button class="back-btn" data-nav="home">‹ Lair</button>
+        <h2>Training Grounds</h2>
+        <div class="coins-mini"><span>🪙</span><span id="practice-coins">0</span></div>
+      </header>
+
+      <div class="section-body">
+        <h3 class="section-label">Mode</h3>
+        <div class="option-grid">
+          <button class="option-card mode-option selected" data-mode="sprint">
+            <span class="opt-icon">⏱️</span>
+            <span class="opt-title">Sprint</span>
+            <span class="opt-desc">60 seconds. Answer as many as you can.</span>
+          </button>
+          <button class="option-card mode-option" data-mode="streak">
+            <span class="opt-icon">🔥</span>
+            <span class="opt-title">Streak</span>
+            <span class="opt-desc">Keep going. One mistake ends the run.</span>
+          </button>
+          <button class="option-card mode-option" data-mode="beat">
+            <span class="opt-icon">🏁</span>
+            <span class="opt-title">Beat Your Time</span>
+            <span class="opt-desc">20 questions. Beat your best time.</span>
+          </button>
+        </div>
+
+        <h3 class="section-label">Operations</h3>
+        <div class="op-row">
+          <button class="op-chip selected" data-op="add">+</button>
+          <button class="op-chip selected" data-op="sub">−</button>
+          <button class="op-chip" data-op="mul">×</button>
+          <button class="op-chip" data-op="div">÷</button>
+        </div>
+
+        <h3 class="section-label">Dragons at your side <span class="muted">(up to 3)</span></h3>
+        <div id="practice-dragon-picker" class="dragon-picker"></div>
+      </div>
+
+      <div class="screen-footer">
+        <button class="btn-primary btn-large" id="practice-start">Begin Training 🔥</button>
+      </div>
+    </section>
+
+    <!-- ========== PRACTICE PLAY ========== -->
+    <section id="screen-play" class="screen play-screen">
+      <header class="play-header">
+        <button class="quit-btn" id="quit-play">✕</button>
+        <div class="play-stats">
+          <div class="play-stat"><span id="play-timer">60</span><small>time</small></div>
+          <div class="play-stat"><span id="play-score">0</span><small>correct</small></div>
+          <div class="play-stat"><span id="play-coins-run">0</span><small>🪙 gold</small></div>
+        </div>
+      </header>
+
+      <div class="play-stage">
+        <div id="play-question" class="question"></div>
+        <div id="play-answer" class="answer-display">&nbsp;</div>
+        <div id="play-feedback" class="feedback"></div>
+      </div>
+
+      <div class="keypad" id="keypad">
+        <button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button>
+        <button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button>
+        <button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button>
+        <button data-key="-" class="key-sign">±</button><button data-key="0">0</button><button data-key="del" class="key-del">⌫</button>
+      </div>
+    </section>
+
+    <!-- ========== RESULTS ========== -->
+    <section id="screen-results" class="screen">
+      <div class="results-card">
+        <div class="results-crest">🐉</div>
+        <h2 id="results-title">Victory</h2>
+        <p id="results-sub" class="results-sub"></p>
+
+        <div class="results-grid" id="results-grid"></div>
+
+        <div class="results-coins">
+          <div class="coin-burst">🪙</div>
+          <div class="coin-amount">+<span id="results-coins">0</span></div>
+          <div class="coin-label">gold earned</div>
+        </div>
+
+        <div id="results-drop" class="results-drop hidden">
+          <div class="drop-title">A dragon appears!</div>
+          <div class="drop-card" id="results-drop-card"></div>
+        </div>
+
+        <div class="results-actions">
+          <button class="btn-ghost" data-nav="home">To Lair</button>
+          <button class="btn-primary" id="results-again">Again</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SHOP ========== -->
+    <section id="screen-shop" class="screen">
+      <header class="screen-header">
+        <button class="back-btn" data-nav="home">‹ Lair</button>
+        <h2>Dragon Shop</h2>
+        <div class="coins-mini"><span>🪙</span><span id="shop-coins">0</span></div>
+      </header>
+      <div class="section-body">
+        <p class="shop-intro">Summon mighty dragons to fight at your side. They grant powers both in training and in battle.</p>
+        <div id="shop-grid" class="shop-grid"></div>
+      </div>
+    </section>
+
+    <!-- ========== HOARD ========== -->
+    <section id="screen-hoard" class="screen">
+      <header class="screen-header">
+        <button class="back-btn" data-nav="home">‹ Lair</button>
+        <h2>Your Hoard</h2>
+        <div class="coins-mini"><span>🪙</span><span id="hoard-coins">0</span></div>
+      </header>
+      <div class="section-body">
+        <div id="hoard-grid" class="hoard-grid"></div>
+      </div>
+    </section>
+
+    <!-- ========== BATTLE SETUP ========== -->
+    <section id="screen-battle-setup" class="screen">
+      <header class="screen-header">
+        <button class="back-btn" data-nav="home">‹ Lair</button>
+        <h2>Tower · Floor <span id="battle-floor-label">1</span></h2>
+        <div class="coins-mini"><span>🪙</span><span id="battle-coins">0</span></div>
+      </header>
+      <div class="section-body">
+        <div id="battle-preview" class="battle-preview">
+          <div class="enemy-preview">
+            <div class="enemy-emoji" id="enemy-emoji">🐲</div>
+            <div class="enemy-name" id="enemy-name">Shadow Wyrmling</div>
+            <div class="enemy-stats">
+              <span>❤️ <span id="enemy-hp">100</span> HP</span>
+              <span>🪙 <span id="enemy-reward">25</span> reward</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-label">Your Team <span class="muted">(up to 3)</span></h3>
+        <div id="battle-dragon-picker" class="dragon-picker"></div>
+
+        <div class="battle-rules">
+          <h4>Battle Rules</h4>
+          <ul>
+            <li><strong>&lt; 2s</strong> answer → <span class="hot">Critical!</span> (30 dmg)</li>
+            <li><strong>&lt; 4s</strong> answer → 20 dmg</li>
+            <li><strong>&lt; 6s</strong> answer → 15 dmg</li>
+            <li>Slow or wrong → You lose 1 ❤️</li>
+            <li>You have <strong>3 ❤️</strong>. Zero = defeat.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="screen-footer">
+        <button class="btn-primary btn-large" id="battle-start">Enter the Tower ⚔️</button>
+      </div>
+    </section>
+
+    <!-- ========== BATTLE PLAY ========== -->
+    <section id="screen-battle" class="screen battle-screen">
+      <header class="battle-header">
+        <button class="quit-btn" id="quit-battle">✕</button>
+        <div class="floor-badge">Floor <span id="battle-floor-num">1</span></div>
+        <div class="hearts" id="battle-hearts">❤️❤️❤️</div>
+      </header>
+
+      <div class="battle-arena">
+        <div class="enemy-card">
+          <div class="enemy-emoji-lg" id="battle-enemy-emoji">🐲</div>
+          <div class="enemy-name-lg" id="battle-enemy-name">Shadow Wyrmling</div>
+          <div class="hp-bar">
+            <div class="hp-fill" id="battle-hp-fill"></div>
+            <div class="hp-text"><span id="battle-hp-cur">100</span> / <span id="battle-hp-max">100</span></div>
+          </div>
+        </div>
+
+        <div class="floating-fx" id="battle-fx"></div>
+
+        <div class="battle-timer">
+          <div class="timer-ring">
+            <svg viewBox="0 0 100 100">
+              <circle class="ring-bg" cx="50" cy="50" r="45" />
+              <circle class="ring-fg" id="timer-ring-fg" cx="50" cy="50" r="45" />
+            </svg>
+            <div class="timer-num" id="battle-time">10</div>
+          </div>
+        </div>
+
+        <div class="battle-question" id="battle-question"></div>
+        <div class="battle-answer" id="battle-answer">&nbsp;</div>
+      </div>
+
+      <div class="keypad" id="battle-keypad">
+        <button data-bkey="1">1</button><button data-bkey="2">2</button><button data-bkey="3">3</button>
+        <button data-bkey="4">4</button><button data-bkey="5">5</button><button data-bkey="6">6</button>
+        <button data-bkey="7">7</button><button data-bkey="8">8</button><button data-bkey="9">9</button>
+        <button data-bkey="-" class="key-sign">±</button><button data-bkey="0">0</button><button data-bkey="del" class="key-del">⌫</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script src="game.js"></script>
+</body>
+</html>

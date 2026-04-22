@@ -1343,6 +1343,30 @@ document.getElementById('reset-btn').addEventListener('click', () => {
   if (confirm('Reset ALL progress? This cannot be undone.')) resetState();
 });
 
+// Restore button (emergency recovery for Pordee)
+document.getElementById('restore-btn').addEventListener('click', () => {
+  if (state.pordeeGifted) {
+    toast("You've already claimed the restoration gift.");
+    return;
+  }
+  if (!confirm('Restore Phase 1 dragons + 3,000 gold + Floor 10?\n\n(Can be claimed once)')) return;
+  applyPordeeGift();
+  alert('Welcome back, Pordee! 🐉\n\nRestored:\n• All 8 Phase 1 dragons\n• +3,000 gold\n• Tower Floor 10');
+});
+
+function applyPordeeGift() {
+  const phase1Dragons = ['hatchling','ember','swift','fire','guardian','fortune','crystal','elder'];
+  phase1Dragons.forEach(id => {
+    state.dragons[id] = Math.max(state.dragons[id] || 0, 1);
+  });
+  state.coins = (state.coins || 0) + 3000;
+  state.highestFloor = Math.max(state.highestFloor || 1, 10);
+  state.currentFloor = Math.max(state.currentFloor || 1, state.highestFloor);
+  state.pordeeGifted = true;
+  saveState();
+  refreshHome();
+}
+
 // Modal handlers
 document.querySelectorAll('[data-close-modal]').forEach(b => {
   b.addEventListener('click', () => closeModal('#' + b.dataset.closeModal));
@@ -1358,23 +1382,13 @@ function checkGift() {
     if (!gift) return;
 
     if (gift === 'pordee' && !state.pordeeGifted) {
-      const phase1Dragons = ['hatchling','ember','swift','fire','guardian','fortune','crystal','elder'];
-      phase1Dragons.forEach(id => {
-        state.dragons[id] = Math.max(state.dragons[id] || 0, 1);
-      });
-      state.coins += 3000;
-      state.highestFloor = Math.max(state.highestFloor || 1, 10);
-      state.currentFloor = Math.max(state.currentFloor || 1, state.highestFloor);
-      state.pordeeGifted = true;
-      saveState();
-      refreshHome();
+      applyPordeeGift();
       setTimeout(() => {
-        alert('Welcome back, Pordee! 🐉\n\nRestored:\n• All 8 Phase 1 dragons\n• +3,000 gold (compensation)\n• Tower Floor 10 unlocked\n\nDad says sorry for the cache trouble!');
+        alert('Welcome back, Pordee! 🐉\n\nRestored:\n• All 8 Phase 1 dragons\n• +3,000 gold\n• Tower Floor 10 unlocked\n\nDad says sorry for the cache trouble!');
       }, 400);
     }
 
     if (gift === 'mega' && !state.megaGifted) {
-      // Emergency bigger gift - more coins & eggs-worth
       Object.keys(DRAGONS).forEach(id => {
         if (!id.endsWith('_a') && DRAGONS[id].rarity !== 'mythic') {
           state.dragons[id] = Math.max(state.dragons[id] || 0, 1);

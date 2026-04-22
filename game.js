@@ -1350,7 +1350,49 @@ document.querySelectorAll('[data-close-modal]').forEach(b => {
 document.getElementById('daily-claim-btn').addEventListener('click', claimDaily);
 document.getElementById('daily-close-btn').addEventListener('click', () => $('#modal-daily').classList.remove('show'));
 
+// ---------- Restoration gift (one-time per flag) ----------
+function checkGift() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const gift = params.get('gift');
+    if (!gift) return;
+
+    if (gift === 'pordee' && !state.pordeeGifted) {
+      const phase1Dragons = ['hatchling','ember','swift','fire','guardian','fortune','crystal','elder'];
+      phase1Dragons.forEach(id => {
+        state.dragons[id] = Math.max(state.dragons[id] || 0, 1);
+      });
+      state.coins += 3000;
+      state.highestFloor = Math.max(state.highestFloor || 1, 10);
+      state.currentFloor = Math.max(state.currentFloor || 1, state.highestFloor);
+      state.pordeeGifted = true;
+      saveState();
+      refreshHome();
+      setTimeout(() => {
+        alert('Welcome back, Pordee! 🐉\n\nRestored:\n• All 8 Phase 1 dragons\n• +3,000 gold (compensation)\n• Tower Floor 10 unlocked\n\nDad says sorry for the cache trouble!');
+      }, 400);
+    }
+
+    if (gift === 'mega' && !state.megaGifted) {
+      // Emergency bigger gift - more coins & eggs-worth
+      Object.keys(DRAGONS).forEach(id => {
+        if (!id.endsWith('_a') && DRAGONS[id].rarity !== 'mythic') {
+          state.dragons[id] = Math.max(state.dragons[id] || 0, 1);
+        }
+      });
+      state.coins += 10000;
+      state.megaGifted = true;
+      saveState();
+      refreshHome();
+      setTimeout(() => alert('Mega restoration: 14 dragons + 10,000 gold! 🔥'), 400);
+    }
+  } catch (e) {
+    console.error('Gift check failed:', e);
+  }
+}
+
 refreshAllUI();
 nav('home');
+checkGift();
 // Show daily bonus if available
 setTimeout(maybeShowDaily, 300);

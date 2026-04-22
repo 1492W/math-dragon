@@ -4,6 +4,7 @@
 
 // ---------- Dragon catalog ----------
 const DRAGONS = {
+  // ----- Common -----
   hatchling: {
     id: 'hatchling', name: 'Hatchling', emoji: '🐣',
     rarity: 'common', price: 0,
@@ -16,6 +17,7 @@ const DRAGONS = {
     desc: '+20% battle damage. +20% gold in training.',
     ability: { damageMul: 1.2, coinMul: 1.2 }
   },
+  // ----- Rare -----
   swift: {
     id: 'swift', name: 'Swiftwing', emoji: '🪽',
     rarity: 'rare', price: 350,
@@ -34,6 +36,19 @@ const DRAGONS = {
     desc: 'Survive 1 wrong answer per battle. Protects your streak.',
     ability: { shield: 1, streakShield: 1 }
   },
+  frost: {
+    id: 'frost', name: 'Frost Wyrm', emoji: '❄️',
+    rarity: 'rare', price: 650,
+    desc: '+2 seconds per question. +25% battle damage.',
+    ability: { timeBonus: 2, damageMul: 1.25 }
+  },
+  earth: {
+    id: 'earth', name: 'Earth Titan', emoji: '🗿',
+    rarity: 'rare', price: 700,
+    desc: 'Survive 1 wrong answer. +20% battle damage.',
+    ability: { shield: 1, damageMul: 1.2 }
+  },
+  // ----- Epic -----
   fortune: {
     id: 'fortune', name: 'Fortune Drake', emoji: '🍀',
     rarity: 'epic', price: 900,
@@ -46,15 +61,103 @@ const DRAGONS = {
     desc: '+40% battle damage. Sell back at 80% value.',
     ability: { damageMul: 1.4, sellBonus: 0.3 }
   },
+  storm: {
+    id: 'storm', name: 'Storm Drake', emoji: '⚡',
+    rarity: 'epic', price: 1400,
+    desc: '+60% damage on fast answers. Lightning strikes twice.',
+    ability: { damageMul: 1.6, critChance: 0.2 }
+  },
+  shadow: {
+    id: 'shadow', name: 'Shadow Serpent', emoji: '🌑',
+    rarity: 'epic', price: 1600,
+    desc: '+30% gold, +35% crit, 25% bonus drops.',
+    ability: { coinMul: 1.3, critChance: 0.35, luckyCoin: 0.25 }
+  },
+  // ----- Legendary -----
   elder: {
     id: 'elder', name: 'Elder Sovereign', emoji: '👑',
     rarity: 'legendary', price: 2800,
     desc: 'Ancient power: +30% damage, +2s, +50% gold.',
     ability: { damageMul: 1.3, timeBonus: 2, coinMul: 1.5 }
-  }
+  },
+  celestial: {
+    id: 'celestial', name: 'Celestial Drake', emoji: '⭐',
+    rarity: 'legendary', price: 3500,
+    desc: '+60% gold. +40% crit. +30% bonus drops. Starborn power.',
+    ability: { coinMul: 1.6, critChance: 0.4, luckyCoin: 0.3 }
+  },
+  void: {
+    id: 'void', name: 'Void Wyrm', emoji: '🌀',
+    rarity: 'legendary', price: 4200,
+    desc: '+80% damage. Survive 2 wrong answers. Unstoppable.',
+    ability: { damageMul: 1.8, shield: 2, streakShield: 1 }
+  },
+  // ----- Mythic (new tier) -----
+  cosmos: {
+    id: 'cosmos', name: 'Cosmos Sovereign', emoji: '🌌',
+    rarity: 'mythic', price: 8000,
+    desc: 'All stats blessed: +50% dmg, +3s, +75% gold, +30% crit.',
+    ability: { damageMul: 1.5, timeBonus: 3, coinMul: 1.75, critChance: 0.3 }
+  },
+  solar: {
+    id: 'solar', name: 'Solar Tyrant', emoji: '☀️',
+    rarity: 'mythic', price: 9500,
+    desc: 'Sun-forged: 2.2× damage, 50% crit, shield x2.',
+    ability: { damageMul: 2.2, critChance: 0.5, shield: 2 }
+  },
+  primordial: {
+    id: 'primordial', name: 'Primordial Wyrm', emoji: '🌋',
+    rarity: 'mythic', price: 12000,
+    desc: 'First of dragons: 2× damage, 2× gold, +5s, +40% crit.',
+    ability: { damageMul: 2.0, coinMul: 2.0, timeBonus: 5, critChance: 0.4 }
+  },
+  // ----- Ascended forms (created by upgrading, not buyable) -----
+  hatchling_a: { id: 'hatchling_a', name: 'Radiant Hatchling', emoji: '✨🐣', rarity: 'rare', price: 0, ascendedFrom: 'hatchling', desc: '(Ascended) +20% gold, +1s. Grown with love.', ability: { coinMul: 1.2, timeBonus: 1 } },
+  ember_a:     { id: 'ember_a',     name: 'Ember Lord',        emoji: '✨🐲', rarity: 'epic',     price: 0, ascendedFrom: 'ember',     desc: '(Ascended) +50% damage, +50% gold.', ability: { damageMul: 1.5, coinMul: 1.5 } },
+  swift_a:     { id: 'swift_a',     name: 'Skywing Sovereign',  emoji: '✨🪽', rarity: 'epic',     price: 0, ascendedFrom: 'swift',    desc: '(Ascended) +5s per question, big speed gold.', ability: { timeBonus: 5, speedCoinBonus: 2, coinMul: 1.2 } },
+  fire_a:      { id: 'fire_a',      name: 'Inferno Tyrant',    emoji: '✨🔥', rarity: 'legendary', price: 0, ascendedFrom: 'fire',    desc: '(Ascended) +90% damage, 3× gold.', ability: { damageMul: 1.9, coinMul: 3.0 } },
+  guardian_a:  { id: 'guardian_a',  name: 'Adamant Bulwark',   emoji: '✨🛡️', rarity: 'epic',    price: 0, ascendedFrom: 'guardian', desc: '(Ascended) Survive 2 wrongs, streak-proof.', ability: { shield: 2, streakShield: 2 } },
+  frost_a:     { id: 'frost_a',     name: 'Glacial Sovereign', emoji: '✨❄️', rarity: 'epic',    price: 0, ascendedFrom: 'frost',    desc: '(Ascended) +5s, +60% damage.', ability: { timeBonus: 5, damageMul: 1.6 } },
+  earth_a:     { id: 'earth_a',     name: 'Mountain Lord',     emoji: '✨🗿', rarity: 'epic',    price: 0, ascendedFrom: 'earth',    desc: '(Ascended) Shield x2, +60% damage.', ability: { shield: 2, damageMul: 1.6 } },
+  fortune_a:   { id: 'fortune_a',   name: 'Fortune Sovereign', emoji: '✨🍀', rarity: 'legendary', price: 0, ascendedFrom: 'fortune', desc: '(Ascended) +55% crit, +40% bonus gold.', ability: { critChance: 0.55, luckyCoin: 0.4, coinMul: 1.3 } },
+  crystal_a:   { id: 'crystal_a',   name: 'Diamond Wyrm',      emoji: '✨💎', rarity: 'legendary', price: 0, ascendedFrom: 'crystal', desc: '(Ascended) +80% damage, 100% sell rate.', ability: { damageMul: 1.8, sellBonus: 0.5 } },
+  storm_a:     { id: 'storm_a',     name: 'Thunder Emperor',   emoji: '✨⚡', rarity: 'legendary', price: 0, ascendedFrom: 'storm',    desc: '(Ascended) Double damage, 40% crit.', ability: { damageMul: 2.0, critChance: 0.4 } },
+  shadow_a:    { id: 'shadow_a',    name: 'Eclipse Serpent',   emoji: '✨🌑', rarity: 'legendary', price: 0, ascendedFrom: 'shadow',   desc: '(Ascended) +60% gold, 65% crit, 50% drops.', ability: { coinMul: 1.6, critChance: 0.65, luckyCoin: 0.5 } },
+  elder_a:     { id: 'elder_a',     name: 'Eternal Sovereign', emoji: '✨👑', rarity: 'mythic',   price: 0, ascendedFrom: 'elder',    desc: '(Ascended) +60% dmg, +4s, double gold.', ability: { damageMul: 1.6, timeBonus: 4, coinMul: 2.0 } },
+  celestial_a: { id: 'celestial_a', name: 'Astral Monarch',    emoji: '✨⭐', rarity: 'mythic',   price: 0, ascendedFrom: 'celestial', desc: '(Ascended) Triple gold, 70% crit, 60% drops.', ability: { coinMul: 3.0, critChance: 0.7, luckyCoin: 0.6 } },
+  void_a:      { id: 'void_a',      name: 'Abyss Sovereign',   emoji: '✨🌀', rarity: 'mythic',   price: 0, ascendedFrom: 'void',      desc: '(Ascended) 2.5× damage, shield x4.', ability: { damageMul: 2.5, shield: 4, streakShield: 2 } },
+  cosmos_a:    { id: 'cosmos_a',    name: 'Galactic Overlord', emoji: '✨🌌', rarity: 'mythic',   price: 0, ascendedFrom: 'cosmos',   desc: '(Ascended) +90% dmg, +5s, +125% gold, 50% crit.', ability: { damageMul: 1.9, timeBonus: 5, coinMul: 2.25, critChance: 0.5 } },
+  solar_a:     { id: 'solar_a',     name: 'Sun Emperor',       emoji: '✨☀️', rarity: 'mythic',   price: 0, ascendedFrom: 'solar',    desc: '(Ascended) 3× damage, 75% crit, shield x4.', ability: { damageMul: 3.0, critChance: 0.75, shield: 4 } },
+  primordial_a: { id: 'primordial_a', name: 'World Wyrm',      emoji: '✨🌋', rarity: 'mythic',   price: 0, ascendedFrom: 'primordial', desc: '(Ascended) 3× dmg & gold, +8s, 60% crit.', ability: { damageMul: 3.0, coinMul: 3.0, timeBonus: 8, critChance: 0.6 } }
 };
 
-const DRAGON_ORDER = ['hatchling','ember','swift','fire','guardian','fortune','crystal','elder'];
+const DRAGON_ORDER = [
+  'hatchling','ember',
+  'swift','fire','guardian','frost','earth',
+  'fortune','crystal','storm','shadow',
+  'elder','celestial','void',
+  'cosmos','solar','primordial'
+];
+
+const ASCENDED_ORDER = [
+  'hatchling_a','ember_a','swift_a','fire_a','guardian_a','frost_a','earth_a',
+  'fortune_a','crystal_a','storm_a','shadow_a',
+  'elder_a','celestial_a','void_a',
+  'cosmos_a','solar_a','primordial_a'
+];
+
+// Rarity tiers (for sorting, drop weights, egg hatching)
+const RARITY_TIER = { common: 0, rare: 1, epic: 2, legendary: 3, mythic: 4 };
+
+// Egg types
+const EGGS = {
+  common: { id: 'common', name: 'Mystery Egg', emoji: '🥚', price: 300,
+            weights: { common: 0.65, rare: 0.30, epic: 0.05 } },
+  rare:   { id: 'rare',   name: 'Rare Egg',    emoji: '🟢', price: 900,
+            weights: { rare: 0.40, epic: 0.45, legendary: 0.15 } },
+  mythic: { id: 'mythic', name: 'Mythic Egg',  emoji: '🟣', price: 2500,
+            weights: { epic: 0.55, legendary: 0.35, mythic: 0.10 } }
+};
 
 // Enemy names by floor tier
 const ENEMIES = [
@@ -67,14 +170,22 @@ const ENEMIES = [
 
 // ---------- State ----------
 const DEFAULT_STATE = {
+  version: 2,
   name: 'Pordee',
   coins: 0,
-  owned: ['hatchling'],  // start with hatchling free
+  dragons: { hatchling: 1 },  // map of id → count (supports duplicates for upgrade)
   highestFloor: 1,
   currentFloor: 1,
   bestSprint: 0,
   bestBeatTime: null,
-  bestStreak: 0
+  bestStreak: 0,
+  // Daily bonus
+  lastClaimDate: null,    // YYYY-MM-DD
+  dailyStreak: 0,         // consecutive days claimed
+  // Stats for fun
+  totalCorrect: 0,
+  totalEggsHatched: 0,
+  totalAscensions: 0
 };
 
 let state = loadState();
@@ -89,6 +200,16 @@ function loadState() {
     const raw = localStorage.getItem('dragonMath_v1');
     if (!raw) return { ...DEFAULT_STATE };
     const parsed = JSON.parse(raw);
+    // --- Migration from v1 (owned array) to v2 (dragons map) ---
+    if (Array.isArray(parsed.owned) && !parsed.dragons) {
+      parsed.dragons = {};
+      parsed.owned.forEach(id => { parsed.dragons[id] = (parsed.dragons[id] || 0) + 1; });
+      delete parsed.owned;
+      parsed.version = 2;
+    }
+    // Ensure hatchling always exists
+    if (!parsed.dragons) parsed.dragons = {};
+    if (!parsed.dragons.hatchling) parsed.dragons.hatchling = 1;
     return { ...DEFAULT_STATE, ...parsed };
   } catch {
     return { ...DEFAULT_STATE };
@@ -100,7 +221,7 @@ function saveState() {
 }
 
 function resetState() {
-  state = { ...DEFAULT_STATE };
+  state = { ...DEFAULT_STATE, dragons: { hatchling: 1 } };
   saveState();
   refreshAllUI();
   nav('home');
@@ -176,7 +297,17 @@ function genProblem() {
 }
 
 // ---------- Dragon helpers ----------
-function ownedDragons() { return state.owned.map(id => DRAGONS[id]).filter(Boolean); }
+function ownedIds() {
+  return Object.keys(state.dragons).filter(id => state.dragons[id] > 0 && DRAGONS[id]);
+}
+function ownedDragons() {
+  return ownedIds().map(id => DRAGONS[id]);
+}
+function ownedCount(id) { return state.dragons[id] || 0; }
+function uniqueOwnedCount() { return ownedIds().length; }
+function totalDragonsCount() {
+  return Object.values(state.dragons).reduce((a, b) => a + b, 0);
+}
 
 function combinedAbility() {
   const combined = { damageMul: 1, coinMul: 1, critChance: 0, luckyCoin: 0,
@@ -196,9 +327,12 @@ function combinedAbility() {
 function refreshHome() {
   $('#player-name').textContent = state.name;
   $('#home-coins').textContent = state.coins.toLocaleString();
-  $('#home-dragons').textContent = state.owned.length;
+  $('#home-dragons').textContent = uniqueOwnedCount();
   $('#home-floor').textContent = state.highestFloor;
   $('#menu-floor').textContent = state.currentFloor;
+  // Daily bonus dot
+  const dot = $('#daily-dot');
+  if (dot) dot.style.display = canClaimDaily() ? 'block' : 'none';
 }
 
 // ---------- Practice setup ----------
@@ -506,51 +640,92 @@ $('#quit-play').addEventListener('click', () => {
 });
 
 // ---------- Shop ----------
+let shopTab = 'dragons'; // 'dragons' or 'eggs'
+
 function renderShop() {
   $('#shop-coins').textContent = state.coins.toLocaleString();
+  // tab highlighting
+  $$('.shop-tab').forEach(b => b.classList.toggle('selected', b.dataset.tab === shopTab));
+  if (shopTab === 'eggs') { renderEggShop(); return; }
+
   const grid = $('#shop-grid');
   grid.innerHTML = '';
   DRAGON_ORDER.forEach(id => {
     const d = DRAGONS[id];
-    if (d.price === 0) return; // hatchling is free/starter
-    const owned = state.owned.includes(id);
+    if (d.price === 0) return;
+    const count = ownedCount(id);
     const canAfford = state.coins >= d.price;
     const card = document.createElement('div');
-    card.className = 'shop-card' + (owned ? ' owned' : '');
+    card.className = 'shop-card';
     card.innerHTML = `
       <div class="shop-emoji">${d.emoji}</div>
       <div class="shop-info">
         <div class="shop-name">
           <span class="shop-rarity-dot rarity-${d.rarity}"></span>${d.name}
+          ${count > 0 ? `<span class="owned-count">×${count}</span>` : ''}
         </div>
         <div class="shop-desc">${d.desc}</div>
       </div>
-      ${owned
-        ? `<button class="shop-sell" data-sell="${id}">Sell<br><small>🪙 ${Math.round(d.price * sellRate())}</small></button>`
-        : `<button class="shop-buy" data-buy="${id}" ${canAfford ? '' : 'disabled'}>
-             <span class="shop-buy-price">🪙 ${d.price}</span>
-             <span class="shop-buy-label">Summon</span>
-           </button>`}
+      <button class="shop-buy" data-buy="${id}" ${canAfford ? '' : 'disabled'}>
+        <span class="shop-buy-price">🪙 ${d.price.toLocaleString()}</span>
+        <span class="shop-buy-label">${count > 0 ? 'Summon another' : 'Summon'}</span>
+      </button>
     `;
     grid.appendChild(card);
   });
-  // Buy / Sell handlers
   grid.querySelectorAll('[data-buy]').forEach(b => b.addEventListener('click', () => buy(b.dataset.buy)));
-  grid.querySelectorAll('[data-sell]').forEach(b => b.addEventListener('click', () => sell(b.dataset.sell)));
 }
 
+function renderEggShop() {
+  const grid = $('#shop-grid');
+  grid.innerHTML = '';
+  const intro = document.createElement('p');
+  intro.className = 'egg-intro';
+  intro.innerHTML = 'Hatch eggs to discover rare dragons. Even duplicates are useful — <strong>3 of a kind</strong> can ascend in your Hoard.';
+  grid.appendChild(intro);
+  Object.values(EGGS).forEach(egg => {
+    const canAfford = state.coins >= egg.price;
+    const card = document.createElement('div');
+    card.className = 'egg-card egg-' + egg.id;
+    // weights display
+    const weights = Object.entries(egg.weights).map(([r, w]) => {
+      const pct = Math.round(w * 100);
+      return `<span class="weight-chip weight-${r}">${r} ${pct}%</span>`;
+    }).join('');
+    card.innerHTML = `
+      <div class="egg-emoji">${egg.emoji}</div>
+      <div class="egg-info">
+        <div class="egg-name">${egg.name}</div>
+        <div class="egg-weights">${weights}</div>
+      </div>
+      <button class="shop-buy egg-buy" data-hatch="${egg.id}" ${canAfford ? '' : 'disabled'}>
+        <span class="shop-buy-price">🪙 ${egg.price.toLocaleString()}</span>
+        <span class="shop-buy-label">Hatch</span>
+      </button>
+    `;
+    grid.appendChild(card);
+  });
+  grid.querySelectorAll('[data-hatch]').forEach(b => b.addEventListener('click', () => hatchEgg(b.dataset.hatch)));
+}
+
+$$('.shop-tab').forEach(b => {
+  b.addEventListener('click', () => { shopTab = b.dataset.tab; renderShop(); });
+});
+
 function sellRate() {
-  // 0.5 base, +0.3 if Crystal Wyrm owned
-  return state.owned.includes('crystal') ? 0.8 : 0.5;
+  const hasCrystal = ownedCount('crystal') > 0 || ownedCount('crystal_a') > 0;
+  const hasDiamond = ownedCount('crystal_a') > 0;
+  if (hasDiamond) return 1.0;
+  if (hasCrystal) return 0.8;
+  return 0.5;
 }
 
 function buy(id) {
   const d = DRAGONS[id];
   if (!d) return;
   if (state.coins < d.price) { toast('Not enough gold.'); return; }
-  if (state.owned.includes(id)) return;
   state.coins -= d.price;
-  state.owned.push(id);
+  state.dragons[id] = (state.dragons[id] || 0) + 1;
   saveState();
   toast(`${d.name} summoned! 🔥`);
   renderShop();
@@ -559,14 +734,22 @@ function buy(id) {
 function sell(id) {
   const d = DRAGONS[id];
   if (!d) return;
-  if (id === 'hatchling') { toast('You cannot sell your first companion.'); return; }
-  if (!confirm(`Sell ${d.name} for ${Math.round(d.price * sellRate())} gold?`)) return;
-  state.coins += Math.round(d.price * sellRate());
-  state.owned = state.owned.filter(x => x !== id);
-  settings.selectedDragons = settings.selectedDragons.filter(x => x !== id);
+  if (id === 'hatchling' && ownedCount('hatchling') <= 1) {
+    toast('You cannot sell your only Hatchling.');
+    return;
+  }
+  const price = d.price > 0 ? Math.round(d.price * sellRate()) : 50;
+  if (!confirm(`Sell one ${d.name} for ${price} gold?`)) return;
+  state.coins += price;
+  state.dragons[id] = Math.max(0, (state.dragons[id] || 0) - 1);
+  if (state.dragons[id] === 0) delete state.dragons[id];
+  // Also remove from selected if we no longer own any
+  if (!ownedCount(id)) {
+    settings.selectedDragons = settings.selectedDragons.filter(x => x !== id);
+  }
   saveState();
   toast(`${d.name} released.`);
-  renderShop();
+  renderHoard();
 }
 
 // ---------- Hoard ----------
@@ -574,33 +757,129 @@ function renderHoard() {
   $('#hoard-coins').textContent = state.coins.toLocaleString();
   const grid = $('#hoard-grid');
   grid.innerHTML = '';
-  DRAGON_ORDER.forEach(id => {
-    const d = DRAGONS[id];
-    const owned = state.owned.includes(id);
-    const card = document.createElement('div');
-    card.className = 'hoard-card' + (owned ? '' : ' locked');
-    card.innerHTML = `
-      <span class="hc-rarity rarity-${d.rarity}"></span>
-      <span class="hc-emoji">${owned ? d.emoji : '❓'}</span>
-      <span class="hc-name">${owned ? d.name : '???'}</span>
-    `;
-    grid.appendChild(card);
-  });
+
+  // Summary header
+  const summary = document.createElement('div');
+  summary.className = 'hoard-summary';
+  summary.innerHTML = `
+    <div><strong>${uniqueOwnedCount()}</strong> / ${DRAGON_ORDER.length + ASCENDED_ORDER.length} discovered</div>
+    <div><strong>${totalDragonsCount()}</strong> dragons total</div>
+  `;
+  grid.appendChild(summary);
+
+  // Base dragons
+  const baseHeader = document.createElement('h3');
+  baseHeader.className = 'hoard-section-title';
+  baseHeader.textContent = 'Dragons';
+  grid.appendChild(baseHeader);
+  const baseRow = document.createElement('div');
+  baseRow.className = 'hoard-row';
+  grid.appendChild(baseRow);
+  DRAGON_ORDER.forEach(id => renderHoardCard(baseRow, id));
+
+  // Ascended section (show only if any unlocked)
+  const anyAscended = ASCENDED_ORDER.some(id => ownedCount(id) > 0);
+  if (anyAscended) {
+    const h = document.createElement('h3');
+    h.className = 'hoard-section-title';
+    h.textContent = '✨ Ascended';
+    grid.appendChild(h);
+    const row = document.createElement('div');
+    row.className = 'hoard-row';
+    grid.appendChild(row);
+    ASCENDED_ORDER.forEach(id => { if (ownedCount(id) > 0) renderHoardCard(row, id); });
+  }
+}
+
+function renderHoardCard(container, id) {
+  const d = DRAGONS[id];
+  const count = ownedCount(id);
+  const owned = count > 0;
+  const canAscend = !id.endsWith('_a') && count >= 3 && DRAGONS[id + '_a'];
+  const isAscended = id.endsWith('_a');
+
+  const card = document.createElement('div');
+  card.className = 'hoard-card' + (owned ? '' : ' locked') + (isAscended ? ' ascended' : '') + (canAscend ? ' can-ascend' : '');
+  card.innerHTML = `
+    <span class="hc-rarity rarity-${d.rarity}"></span>
+    ${count > 1 ? `<span class="hc-count">×${count}</span>` : ''}
+    <span class="hc-emoji">${owned ? d.emoji : '❓'}</span>
+    <span class="hc-name">${owned ? d.name : '???'}</span>
+    ${canAscend ? `<button class="hc-ascend" data-ascend="${id}">✨ Ascend</button>` : ''}
+    ${owned && !isAscended && d.price > 0 ? `<button class="hc-sell" data-sell-hoard="${id}">Sell 🪙${Math.round(d.price * sellRate())}</button>` : ''}
+  `;
+  container.appendChild(card);
+
+  if (canAscend) {
+    card.querySelector('[data-ascend]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      ascendDragon(id);
+    });
+  }
+  if (owned && !isAscended && d.price > 0) {
+    const sellBtn = card.querySelector('[data-sell-hoard]');
+    if (sellBtn) sellBtn.addEventListener('click', (e) => { e.stopPropagation(); sell(id); });
+  }
+}
+
+function ascendDragon(id) {
+  const baseId = id;
+  const ascendedId = baseId + '_a';
+  if (!DRAGONS[ascendedId]) return;
+  if (ownedCount(baseId) < 3) { toast('Need 3 to ascend.'); return; }
+  const baseName = DRAGONS[baseId].name;
+  const newName = DRAGONS[ascendedId].name;
+  if (!confirm(`Ascend 3 ${baseName} → 1 ${newName}?\n\nThis cannot be undone.`)) return;
+  state.dragons[baseId] -= 3;
+  if (state.dragons[baseId] === 0) delete state.dragons[baseId];
+  state.dragons[ascendedId] = (state.dragons[ascendedId] || 0) + 1;
+  state.totalAscensions = (state.totalAscensions || 0) + 1;
+  // Remove old id from selected dragons if we no longer own any
+  if (!ownedCount(baseId)) {
+    settings.selectedDragons = settings.selectedDragons.filter(x => x !== baseId);
+  }
+  saveState();
+  showAscendAnim(ascendedId);
+  renderHoard();
+}
+
+function showAscendAnim(ascendedId) {
+  const d = DRAGONS[ascendedId];
+  const m = $('#modal-ascend');
+  $('#ascend-emoji').textContent = d.emoji;
+  $('#ascend-name').textContent = d.name;
+  $('#ascend-desc').textContent = d.desc;
+  $('#ascend-rarity').className = 'modal-rarity rarity-' + d.rarity;
+  $('#ascend-rarity').textContent = d.rarity;
+  m.classList.add('show');
 }
 
 // ---------- Battle ----------
 function enemyForFloor(floor) {
-  const isBoss = floor % 5 === 0;
+  const isLegendary = floor > 0 && floor % 10 === 0;  // every 10 = legendary boss
+  const isBoss = !isLegendary && floor % 5 === 0;     // regular boss every 5
   const tierIdx = Math.min(Math.floor((floor - 1) / 5), ENEMIES.length - 1);
   const tier = ENEMIES[tierIdx];
   const name = pick(tier.names);
   const baseHP = 80 + floor * 20;
-  const hp = isBoss ? Math.round(baseHP * 1.6) : baseHP;
-  const reward = 20 + floor * 5 + (isBoss ? 50 : 0);
+  let hp = baseHP;
+  let reward = 20 + floor * 5;
+  let emoji = tier.emoji;
+  let prefix = '';
+  if (isLegendary) {
+    hp = Math.round(baseHP * 2.4);
+    reward = 40 + floor * 8 + 150;
+    emoji = '👁️';  // legendary sigil
+    prefix = '💎 ';
+  } else if (isBoss) {
+    hp = Math.round(baseHP * 1.6);
+    reward = 20 + floor * 5 + 50;
+    prefix = '👑';
+  }
   return {
-    emoji: isBoss ? '👑' + tier.emoji : tier.emoji,
-    name: isBoss ? `${name} (Boss)` : name,
-    hp, maxHp: hp, reward, isBoss
+    emoji: prefix + emoji,
+    name: isLegendary ? `${name} (LEGENDARY)` : isBoss ? `${name} (Boss)` : name,
+    hp, maxHp: hp, reward, isBoss, isLegendary
   };
 }
 
@@ -760,22 +1039,34 @@ function winBattle() {
   if (state.currentFloor > state.highestFloor) state.highestFloor = state.currentFloor;
 
   // Dragon drop chance
-  const dropChance = battle.enemy.isBoss ? 0.7 : 0.08;
   let dropped = null;
-  if (Math.random() < dropChance) {
-    // pick an unowned dragon, weighted by rarity
-    const pool = DRAGON_ORDER.filter(id => !state.owned.includes(id) && DRAGONS[id].price > 0);
-    if (pool.length > 0) {
-      // prefer rarer ones on boss
-      const weighted = battle.enemy.isBoss
-        ? pool.sort((a,b) => DRAGONS[b].price - DRAGONS[a].price).slice(0, 3)
-        : pool;
-      dropped = pick(weighted);
-      state.owned.push(dropped);
-    }
+  let freeEgg = null;
+  if (battle.enemy.isLegendary) {
+    // Legendary boss: guaranteed mythic egg
+    freeEgg = 'mythic';
+  } else if (battle.enemy.isBoss) {
+    // Regular boss: 70% chance of dragon drop
+    if (Math.random() < 0.7) dropped = rollDragonDrop(['epic','legendary']);
+  } else {
+    // Normal: 8% chance, lower rarity pool
+    if (Math.random() < 0.08) dropped = rollDragonDrop(['common','rare']);
+  }
+  if (dropped) {
+    state.dragons[dropped] = (state.dragons[dropped] || 0) + 1;
   }
   saveState();
-  showBattleResults({ win: true, dropped });
+  showBattleResults({ win: true, dropped, freeEgg });
+}
+
+// Drop pool weighted toward listed rarities
+function rollDragonDrop(preferredRarities) {
+  const pool = DRAGON_ORDER.filter(id => DRAGONS[id].price > 0 && preferredRarities.includes(DRAGONS[id].rarity));
+  if (pool.length === 0) {
+    // fallback: any non-free dragon
+    const all = DRAGON_ORDER.filter(id => DRAGONS[id].price > 0);
+    return pick(all);
+  }
+  return pick(pool);
 }
 
 function loseBattle() {
@@ -789,8 +1080,8 @@ function loseBattle() {
   showBattleResults({ win: false });
 }
 
-function showBattleResults({ win, dropped }) {
-  $('#results-title').textContent = win ? 'Victory!' : 'Defeated';
+function showBattleResults({ win, dropped, freeEgg }) {
+  $('#results-title').textContent = win ? (battle.enemy.isLegendary ? 'LEGENDARY!' : 'Victory!') : 'Defeated';
   $('#results-sub').textContent = win
     ? `Floor ${battle.floor} cleared`
     : `The ${battle.enemy.name} bested you. Try again.`;
@@ -810,15 +1101,34 @@ function showBattleResults({ win, dropped }) {
   });
   $('#results-coins').textContent = battle.coins;
   const dropEl = $('#results-drop');
+  const drops = [];
   if (dropped) {
     const d = DRAGONS[dropped];
+    drops.push(`${d.emoji} <span class="dn">${d.name}</span>`);
+  }
+  if (freeEgg) {
+    // give the egg: immediately hatch it as reward
+    const eggD = EGGS[freeEgg];
+    drops.push(`${eggD.emoji} <span class="dn">${eggD.name} (auto-hatch)</span>`);
+    // queue the hatch after results close
+    battle.queuedHatch = freeEgg;
+  }
+  if (drops.length > 0) {
     dropEl.classList.remove('hidden');
-    $('#results-drop-card').innerHTML = `${d.emoji} <span class="dn">${d.name}</span>`;
+    $('#results-drop-card').innerHTML = drops.join('<br>');
   } else {
     dropEl.classList.add('hidden');
   }
   $('#results-again').textContent = win ? 'Next Floor' : 'Try Again';
-  $('#results-again').onclick = () => nav('battle-setup');
+  $('#results-again').onclick = () => {
+    if (battle.queuedHatch) {
+      const eggId = battle.queuedHatch;
+      battle.queuedHatch = null;
+      doHatch(eggId, true);  // free hatch
+    } else {
+      nav('battle-setup');
+    }
+  };
   nav('results');
 }
 
@@ -856,10 +1166,154 @@ $('#quit-battle').addEventListener('click', () => {
   }
 });
 
-// ---------- Reset ----------
-$('#reset-btn').addEventListener('click', () => {
-  if (confirm('Reset ALL progress? This cannot be undone.')) resetState();
-});
+// ---------- Egg Hatch ----------
+function hatchEgg(eggId) {
+  const egg = EGGS[eggId];
+  if (!egg) return;
+  if (state.coins < egg.price) { toast('Not enough gold.'); return; }
+  state.coins -= egg.price;
+  saveState();
+  doHatch(eggId, false);
+}
+
+function doHatch(eggId, isFree) {
+  const egg = EGGS[eggId];
+  // Pick rarity by weighted chance
+  const rarity = weightedPick(egg.weights);
+  // Pick a random non-ascended dragon of that rarity
+  const pool = DRAGON_ORDER.filter(id => DRAGONS[id].rarity === rarity && DRAGONS[id].price > 0);
+  if (pool.length === 0) { toast('The egg was empty... try again.'); return; }
+  const dragonId = pick(pool);
+  state.dragons[dragonId] = (state.dragons[dragonId] || 0) + 1;
+  state.totalEggsHatched = (state.totalEggsHatched || 0) + 1;
+  saveState();
+  showHatchAnim(egg, DRAGONS[dragonId], isFree);
+}
+
+function weightedPick(weights) {
+  const total = Object.values(weights).reduce((a,b) => a+b, 0);
+  let r = Math.random() * total;
+  for (const [k, w] of Object.entries(weights)) {
+    r -= w;
+    if (r <= 0) return k;
+  }
+  return Object.keys(weights)[0];
+}
+
+function showHatchAnim(egg, dragon, isFree) {
+  const m = $('#modal-hatch');
+  $('#hatch-egg').textContent = egg.emoji;
+  $('#hatch-title').textContent = isFree ? 'A gift from the Legendary!' : 'The egg hatches...';
+  $('#hatch-emoji').textContent = dragon.emoji;
+  $('#hatch-name').textContent = dragon.name;
+  $('#hatch-desc').textContent = dragon.desc;
+  $('#hatch-rarity').className = 'modal-rarity rarity-' + dragon.rarity;
+  $('#hatch-rarity').textContent = dragon.rarity;
+  m.classList.add('show');
+  $('#hatch-egg').className = 'hatch-egg-phase phase-shake';
+  $('#hatch-reveal').classList.remove('show');
+  setTimeout(() => {
+    $('#hatch-egg').className = 'hatch-egg-phase phase-crack';
+  }, 1400);
+  setTimeout(() => {
+    $('#hatch-egg').style.display = 'none';
+    $('#hatch-reveal').classList.add('show');
+  }, 2200);
+}
+
+function closeModal(id) {
+  $(id).classList.remove('show');
+  $('#hatch-egg').style.display = '';
+  refreshHome();
+  const active = document.querySelector('.screen.active');
+  if (active && active.id === 'screen-shop') renderShop();
+  if (active && active.id === 'screen-hoard') renderHoard();
+}
+
+// ---------- Daily Bonus ----------
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function yesterdayStr() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function canClaimDaily() {
+  return state.lastClaimDate !== todayStr();
+}
+
+const DAILY_REWARDS = [
+  { day: 1, coins: 30 },
+  { day: 2, coins: 50 },
+  { day: 3, coins: 80 },
+  { day: 4, coins: 120 },
+  { day: 5, coins: 200 },
+  { day: 6, coins: 300 },
+  { day: 7, coins: 0, egg: 'rare', label: 'FREE RARE EGG' },
+  { day: 14, coins: 0, egg: 'mythic', label: 'FREE MYTHIC EGG' }
+];
+
+function computeDailyReward(streakDay) {
+  // Map streak day to reward:
+  // day 1-6: direct
+  // day 7: rare egg
+  // day 8-13: cycle 50→300
+  // day 14: mythic egg
+  // day 15+: repeat small rewards
+  if (streakDay === 7) return { egg: 'rare', label: 'Rare Egg!' };
+  if (streakDay === 14) return { egg: 'mythic', label: 'MYTHIC EGG!' };
+  if (streakDay <= 6) return { coins: DAILY_REWARDS[streakDay - 1].coins };
+  if (streakDay <= 13) return { coins: 50 + (streakDay - 7) * 50 };
+  // day 15+
+  return { coins: 100 + Math.min(streakDay - 14, 10) * 25 };
+}
+
+function claimDaily() {
+  if (!canClaimDaily()) return;
+  // Update streak
+  if (state.lastClaimDate === yesterdayStr()) {
+    state.dailyStreak = (state.dailyStreak || 0) + 1;
+  } else {
+    state.dailyStreak = 1;
+  }
+  const reward = computeDailyReward(state.dailyStreak);
+  state.lastClaimDate = todayStr();
+
+  // Apply reward
+  let msg = `Day ${state.dailyStreak}! `;
+  if (reward.coins) {
+    state.coins += reward.coins;
+    msg += `+${reward.coins} 🪙`;
+  }
+  saveState();
+  $('#modal-daily').classList.remove('show');
+  refreshHome();
+
+  if (reward.egg) {
+    // Auto-hatch the reward egg
+    toast(`Day ${state.dailyStreak}: ${reward.label}!`);
+    setTimeout(() => doHatch(reward.egg, true), 400);
+  } else {
+    toast(msg);
+  }
+}
+
+function maybeShowDaily() {
+  if (!canClaimDaily()) return;
+  // Compute what the reward would be (streak +1 if yesterday, else 1)
+  let projectedStreak = (state.lastClaimDate === yesterdayStr()) ? (state.dailyStreak || 0) + 1 : 1;
+  const reward = computeDailyReward(projectedStreak);
+  $('#daily-streak-preview').textContent = projectedStreak;
+  let rewardText = '';
+  if (reward.coins) rewardText = `+${reward.coins} Gold`;
+  if (reward.egg) rewardText = reward.label || reward.egg + ' egg';
+  $('#daily-reward-preview').textContent = rewardText;
+  $('#modal-daily').classList.add('show');
+}
 
 // ---------- Keyboard support ----------
 document.addEventListener('keydown', (e) => {
@@ -884,5 +1338,19 @@ function refreshAllUI() {
   refreshHome();
 }
 
+// Reset button
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (confirm('Reset ALL progress? This cannot be undone.')) resetState();
+});
+
+// Modal handlers
+document.querySelectorAll('[data-close-modal]').forEach(b => {
+  b.addEventListener('click', () => closeModal('#' + b.dataset.closeModal));
+});
+document.getElementById('daily-claim-btn').addEventListener('click', claimDaily);
+document.getElementById('daily-close-btn').addEventListener('click', () => $('#modal-daily').classList.remove('show'));
+
 refreshAllUI();
 nav('home');
+// Show daily bonus if available
+setTimeout(maybeShowDaily, 300);

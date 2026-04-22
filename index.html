@@ -57,6 +57,7 @@
           <span class="menu-icon">🔥</span>
           <span class="menu-title">Shop</span>
           <span class="menu-desc">Summon dragons</span>
+          <span id="daily-dot" class="daily-dot"></span>
         </button>
         <button class="menu-card" data-nav="hoard">
           <span class="menu-icon">💎</span>
@@ -175,7 +176,10 @@
         <div class="coins-mini"><span>🪙</span><span id="shop-coins">0</span></div>
       </header>
       <div class="section-body">
-        <p class="shop-intro">Summon mighty dragons to fight at your side. They grant powers both in training and in battle.</p>
+        <div class="shop-tabs">
+          <button class="shop-tab selected" data-tab="dragons">🐉 Dragons</button>
+          <button class="shop-tab" data-tab="eggs">🥚 Eggs</button>
+        </div>
         <div id="shop-grid" class="shop-grid"></div>
       </div>
     </section>
@@ -273,6 +277,62 @@
     </section>
 
   </main>
+
+  <!-- ========== MODALS ========== -->
+  <!-- Hatch modal -->
+  <div id="modal-hatch" class="modal">
+    <div class="modal-card modal-hatch-card">
+      <div class="modal-header">
+        <h3 id="hatch-title">The egg hatches...</h3>
+      </div>
+      <div class="hatch-stage">
+        <div id="hatch-egg" class="hatch-egg-phase">🥚</div>
+        <div id="hatch-reveal" class="hatch-reveal">
+          <div class="hatch-burst"></div>
+          <div id="hatch-emoji" class="hatch-dragon-emoji">🐲</div>
+          <div id="hatch-name" class="hatch-dragon-name">Dragon</div>
+          <div id="hatch-rarity" class="modal-rarity"></div>
+          <div id="hatch-desc" class="hatch-dragon-desc"></div>
+        </div>
+      </div>
+      <button class="btn-primary btn-large" data-close-modal="modal-hatch">Claim</button>
+    </div>
+  </div>
+
+  <!-- Ascend modal -->
+  <div id="modal-ascend" class="modal">
+    <div class="modal-card modal-ascend-card">
+      <div class="ascend-aura"></div>
+      <div class="modal-header">
+        <h3>✨ ASCENDED ✨</h3>
+      </div>
+      <div id="ascend-emoji" class="hatch-dragon-emoji ascend-glow">✨🐲</div>
+      <div id="ascend-name" class="hatch-dragon-name">Ember Lord</div>
+      <div id="ascend-rarity" class="modal-rarity"></div>
+      <div id="ascend-desc" class="hatch-dragon-desc"></div>
+      <button class="btn-primary btn-large" data-close-modal="modal-ascend">Behold</button>
+    </div>
+  </div>
+
+  <!-- Daily bonus modal -->
+  <div id="modal-daily" class="modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Daily Bonus</h3>
+      </div>
+      <div class="daily-streak">Day <span id="daily-streak-preview">1</span></div>
+      <div class="daily-reward" id="daily-reward-preview">+30 Gold</div>
+      <div class="daily-streak-info">
+        🔥 Keep your streak going! Miss a day and it resets.
+        <br/>Day 7 = Rare Egg · Day 14 = Mythic Egg
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="daily-close-btn">Later</button>
+        <button class="btn-primary" id="daily-claim-btn">Claim</button>
+      </div>
+      <div class="daily-confirm" id="daily-reward-text" style="display:none"></div>
+    </div>
+  </div>
 
   <!-- Toast -->
   <div id="toast" class="toast"></div>

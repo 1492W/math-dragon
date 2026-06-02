@@ -185,7 +185,11 @@ const DEFAULT_STATE = {
   // Stats for fun
   totalCorrect: 0,
   totalEggsHatched: 0,
-  totalAscensions: 0
+  totalAscensions: 0,
+  // Times-table trials: factId ("7x8") -> mastery level 0..3
+  multFacts: {},
+  // Facts answered slowly/wrong, collected for focused practice: factId -> 1
+  multSlow: {}
 };
 
 let state = loadState();
@@ -253,6 +257,7 @@ function nav(screen) {
   if (screen === 'shop') renderShop();
   if (screen === 'hoard') renderHoard();
   if (screen === 'battle-setup') refreshBattleSetup();
+  if (screen === 'tables') renderTables();
   window.scrollTo(0, 0);
 }
 
@@ -590,6 +595,7 @@ function endPractice() {
   });
   $('#results-coins').textContent = play.coins;
   $('#results-drop').classList.add('hidden'); // no drops in practice
+  $('#results-slow') && $('#results-slow').classList.add('hidden');
 
   $('#results-again').onclick = () => {
     if (play.mode === 'sprint') startPractice();
@@ -1100,6 +1106,7 @@ function showBattleResults({ win, dropped, freeEgg }) {
     grid.appendChild(el);
   });
   $('#results-coins').textContent = battle.coins;
+  $('#results-slow') && $('#results-slow').classList.add('hidden');
   const dropEl = $('#results-drop');
   const drops = [];
   if (dropped) {
@@ -1404,6 +1411,299 @@ function checkGift() {
     console.error('Gift check failed:', e);
   }
 }
+
+/* =====================================================================
+   TIMES-TABLE TRIALS  (added phase3) — isolated; does not touch battle/practice engine
+   Per-table drill (×2..×12). Mastery stored in state.multFacts ("7x8" -> 0..3).
+   ===================================================================== */
+const TT_MASTER = 3;                       // fast+correct answers to master a fact
+const TT_FAST = 3.0;                        // seconds — under this counts as fluent
+const TT_MAX_ATTEMPTS = 5;                  // safety cap: stop looping one fact forever
+const TT_GAUNTLET_SIZE = 6;                 // facts per Gauntlet level
+const TT_TABLES = [2,3,4,5,6,7,8,9,10,11,12];
+const TT_TIPS = {
+  2:  'Doubles — add the number to itself.',
+  3:  'Count up in 3s: 3, 6, 9, 12…',
+  4:  'Double, then double again (×2 twice).',
+  5:  'Always ends in 0 or 5.',
+  6:  '×5 plus one more of the number.',
+  7:  'The tricky one — drill it often. 7×8 = 56.',
+  8:  'Double three times. All answers are even.',
+  9:  'The two digits add up to 9 (9×4=36 → 3+6=9).',
+  10: 'Just add a 0 to the number.',
+  11: '×1–9 gives a doubled digit (11×4 = 44).',
+  12: '×10 plus ×2 (12×n = 10×n + 2×n).'
+};
+function ttId(a, b) { return a + 'x' + b; }
+function ttLevel(a, b) { return (state.multFacts && state.multFacts[ttId(a, b)]) || 0; }
+function ttSetLevel(a, b, v) {
+  if (!state.multFacts) state.multFacts = {};
+  state.multFacts[ttId(a, b)] = Math.max(0, Math.min(TT_MASTER, v));
+}
+function ttMasteredInTable(a) {
+  let n = 0;
+  for (let b = 1; b <= 12; b++) if (ttLevel(a, b) >= TT_MASTER) n++;
+  return n;
+}
+function ttSlowIds() { return state.multSlow ? Object.keys(state.multSlow) : []; }
+function ttMarkSlow(a, b) { if (!state.multSlow) state.multSlow = {}; state.multSlow[ttId(a, b)] = 1; }
+function ttClearSlow(a, b) { if (state.multSlow) delete state.multSlow[ttId(a, b)]; }
+// Split the slow pile into ordered Gauntlet levels (stubborn first, deterministic)
+function gauntletLevels() {
+  const facts = ttSlowIds().map(id => { const [a, b] = id.split('x').map(Number); return { a, b }; });
+  facts.sort((x, y) => (ttLevel(x.a, x.b) - ttLevel(y.a, y.b)) || (x.a - y.a) || (x.b - y.b));
+  const levels = [];
+  for (let i = 0; i < facts.length; i += TT_GAUNTLET_SIZE) levels.push(facts.slice(i, i + TT_GAUNTLET_SIZE));
+  return levels;
+}
+
+// ----- Table-select screen -----
+function renderTables() {
+  const coinsEl = $('#tables-coins'); if (coinsEl) coinsEl.textContent = state.coins.toLocaleString();
+  // Dragon's Gauntlet (the slow pile), split into levels
+  const wrap = $('#gauntlet-wrap'); const ggrid = $('#gauntlet-grid');
+  const levels = gauntletLevels();
+  if (levels.length) {
+    wrap.classList.remove('hidden');
+    ggrid.innerHTML = '';
+    levels.forEach((facts, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'gauntlet-card';
+      const preview = facts.slice(0, 4).map(f => f.a + '×' + f.b).join('  ');
+      btn.innerHTML = `
+        <span class="gauntlet-emoji">👹</span>
+        <span class="gauntlet-body">
+          <span class="gauntlet-title">Gauntlet ${roman(idx + 1)}</span>
+          <span class="gauntlet-desc">${facts.length} rune${facts.length > 1 ? 's' : ''} · ${preview}${facts.length > 4 ? ' …' : ''}</span>
+        </span>
+        <span class="gauntlet-go">⚔️</span>`;
+      btn.addEventListener('click', () => startGauntlet(idx));
+      ggrid.appendChild(btn);
+    });
+  } else {
+    wrap.classList.add('hidden');
+  }
+  const grid = $('#tables-grid');
+  grid.innerHTML = '';
+  TT_TABLES.forEach(a => {
+    const m = ttMasteredInTable(a);
+    const pct = Math.round(m / 12 * 100);
+    const done = m === 12;
+    const card = document.createElement('button');
+    card.className = 'rune-card' + (done ? ' rune-done' : '');
+    card.innerHTML = `
+      <span class="rune-x">×${a}</span>
+      <span class="rune-count">${m}/12</span>
+      <span class="rune-bar"><i style="width:${pct}%"></i></span>
+      ${done ? '<span class="rune-seal">🐉</span>' : ''}`;
+    card.addEventListener('click', () => startTable(a));
+    grid.appendChild(card);
+  });
+}
+function roman(n) { return ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][n - 1] || ('' + n); }
+
+// ----- Table run -----
+let ttRun = null;
+function startTable(a) {
+  let facts = [];
+  for (let b = 1; b <= 12; b++) facts.push({ a, b });
+  facts.sort(() => Math.random() - 0.5);
+  facts.sort((x, y) => ttLevel(x.a, x.b) - ttLevel(y.a, y.b));
+  beginRun({ table: a, slow: false, queue: facts, retry: () => startTable(a) });
+  $('#tablerun-title').textContent = 'Trial of ×' + a;
+  $('#tablerun-tip').textContent = TT_TIPS[a] || '';
+}
+function startGauntlet(idx) {
+  const levels = gauntletLevels();
+  const facts = levels[idx];
+  if (!facts || !facts.length) { toast('That gauntlet is cleared! 🐉'); nav('tables'); return; }
+  const queue = facts.slice().sort(() => Math.random() - 0.5);
+  beginRun({ table: 'gauntlet', slow: true, queue, retry: () => startGauntlet(idx) });
+  $('#tablerun-title').textContent = '👹 Gauntlet ' + roman(idx + 1);
+  $('#tablerun-tip').textContent = 'Answer fast (under ' + TT_FAST + 's) without slipping to reclaim each rune.';
+}
+function beginRun(opts) {
+  ttRun = {
+    table: opts.table, slow: opts.slow, retry: opts.retry,
+    queue: opts.queue, goal: opts.queue.length,
+    cleared: 0, correct: 0, attemptsTotal: 0,
+    times: [], attempts: {}, stumbled: {}, finished: false, locked: false, coins: 0
+  };
+  nav('tablerun');
+  ttNext();
+}
+function ttNext() {
+  if (!ttRun) return;
+  if (!ttRun.queue.length) return ttFinish();
+  ttRun.cur = ttRun.queue.shift();
+  ttRun.answer = '';
+  ttRun.qStart = Date.now();
+  const left = ttRun.queue.length + 1;
+  $('#tablerun-prog').textContent = ttRun.cleared + ' / ' + ttRun.goal + (ttRun.slow ? '' : ' · ' + left + ' left');
+  $('#tablerun-q').textContent = ttRun.cur.a + ' × ' + ttRun.cur.b;
+  const ans = $('#tablerun-answer');
+  ans.textContent = '\u00A0'; ans.className = 'battle-answer';
+  $('#tablerun-feedback').textContent = '';
+  $('#tablerun-feedback').className = 'feedback';
+  ttDrawDots(ttLevel(ttRun.cur.a, ttRun.cur.b));
+}
+function ttDrawDots(lvl) {
+  const d = $('#tablerun-mastery'); d.innerHTML = '';
+  for (let i = 0; i < TT_MASTER; i++) {
+    const s = document.createElement('i');
+    s.className = 'tt-dot' + (i < lvl ? ' on' : '');
+    d.appendChild(s);
+  }
+}
+function ttPress(key) {
+  if (!ttRun || ttRun.finished || ttRun.locked) return;
+  if (key === 'del') ttRun.answer = ttRun.answer.slice(0, -1);
+  else { ttRun.answer += key; if (ttRun.answer.length > 4) ttRun.answer = ttRun.answer.slice(0, 4); }
+  $('#tablerun-answer').textContent = ttRun.answer || '\u00A0';
+  const expected = String(ttRun.cur.a * ttRun.cur.b).length;
+  if (ttRun.answer.length >= expected) {
+    clearTimeout(ttPress._t);
+    ttPress._t = setTimeout(ttSubmit, 220);
+  }
+}
+function ttSubmit() {
+  if (!ttRun || ttRun.finished || ttRun.locked) return;
+  if (ttRun.answer === '') return;
+  const val = parseInt(ttRun.answer, 10);
+  if (isNaN(val)) return;
+  ttRun.locked = true;
+  const cur = ttRun.cur, correct = cur.a * cur.b;
+  const id = ttId(cur.a, cur.b);
+  const elapsed = (Date.now() - ttRun.qStart) / 1000;
+  ttRun.attemptsTotal++;
+  ttRun.attempts[id] = (ttRun.attempts[id] || 0) + 1;
+  const capped = ttRun.attempts[id] >= TT_MAX_ATTEMPTS;
+  const ans = $('#tablerun-answer'), fb = $('#tablerun-feedback');
+  const right = val === correct;
+  const fast = elapsed < TT_FAST;
+
+  if (right) { ttRun.correct++; ttRun.times.push(elapsed); }
+
+  if (right && fast) {
+    // fluent this attempt — clear from the active loop so the run can progress
+    ttSetLevel(cur.a, cur.b, ttLevel(cur.a, cur.b) + 1);
+    // graduate from the Gauntlet pile ONLY if it was a clean first try (never stumbled this run)
+    if (!ttRun.stumbled[id]) ttClearSlow(cur.a, cur.b);
+    else ttMarkSlow(cur.a, cur.b);
+    ttRun.cleared++;
+    let reward = 2; ttRun.coins = (ttRun.coins || 0) + reward;
+    state.totalCorrect = (state.totalCorrect || 0) + 1;
+    ans.classList.add('correct');
+    fb.textContent = '⚡ ' + elapsed.toFixed(1) + 's  +' + reward + ' 🪙';
+    fb.className = 'feedback show-good';
+    ttDrawDots(ttLevel(cur.a, cur.b));
+    saveState();
+    setTimeout(() => { ttRun.locked = false; ttNext(); }, 460);
+  } else if (right && !fast) {
+    // correct but slow — needs more practice, and it goes to the Gauntlet pile
+    ttRun.stumbled[id] = true;
+    ttMarkSlow(cur.a, cur.b);
+    state.totalCorrect = (state.totalCorrect || 0) + 1;
+    ans.classList.add('correct');
+    if (capped) {
+      ttRun.cleared++;
+      fb.textContent = '🐢 ' + correct + ' · ' + elapsed.toFixed(1) + 's — added to the Gauntlet';
+    } else {
+      ttRun.queue.splice(Math.min(2, ttRun.queue.length), 0, cur); // comes back soon
+      fb.textContent = '🐢 ' + elapsed.toFixed(1) + 's — a bit slow, try again faster!';
+    }
+    fb.className = 'feedback show-miss';
+    saveState();
+    setTimeout(() => { ttRun.locked = false; ttNext(); }, 1050);
+  } else {
+    // wrong — to the Gauntlet pile
+    ttSetLevel(cur.a, cur.b, 0);
+    ttRun.stumbled[id] = true;
+    ttMarkSlow(cur.a, cur.b);
+    ans.classList.add('wrong');
+    if (capped) {
+      ttRun.cleared++;
+      fb.textContent = '✗ ' + cur.a + ' × ' + cur.b + ' = ' + correct;
+    } else {
+      ttRun.queue.splice(Math.min(2, ttRun.queue.length), 0, cur);
+      fb.textContent = '✗ ' + cur.a + ' × ' + cur.b + ' = ' + correct;
+    }
+    fb.className = 'feedback show-miss';
+    ttDrawDots(0);
+    saveState();
+    setTimeout(() => { ttRun.locked = false; ttNext(); }, 1300);
+  }
+}
+function ttFinish() {
+  if (!ttRun) return;
+  ttRun.finished = true;
+  const a = ttRun.table;
+  ttRun.coins = ttRun.coins || 0;
+  // speed stats
+  const times = ttRun.times.slice();
+  const avg = times.length ? (times.reduce((s, t) => s + t, 0) / times.length) : null;
+  const fastest = times.length ? Math.min(...times) : null;
+  const stillSlow = ttSlowIds().length;
+  // completion bonus
+  let bonus = 0;
+  if (!ttRun.slow && ttMasteredInTable(a) === 12) bonus = 25;
+  if (ttRun.slow && stillSlow === 0) bonus = 40;
+  ttRun.coins += bonus;
+  state.coins += ttRun.coins;
+  saveState();
+  // Results screen
+  $('#results-title').textContent = ttRun.slow
+    ? (stillSlow === 0 ? 'Gauntlet cleared! 🐉' : '👹 Gauntlet')
+    : (ttMasteredInTable(a) === 12 ? '×' + a + ' Mastered! 🐉' : 'Trial of ×' + a);
+  $('#results-sub').textContent = ttRun.slow
+    ? (stillSlow + ' runes still in the Gauntlet')
+    : (ttMasteredInTable(a) + ' / 12 facts fluent');
+  const grid = $('#results-grid'); grid.innerHTML = '';
+  const stats = [
+    { label: 'Avg speed', value: avg ? avg.toFixed(1) + 's' : '—' },
+    { label: 'Fastest', value: fastest ? fastest.toFixed(1) + 's' : '—' },
+    { label: 'Correct', value: ttRun.correct },
+    { label: 'In Gauntlet', value: stillSlow }
+  ];
+  stats.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'result-stat';
+    el.innerHTML = `<div class="result-stat-value">${s.value}</div><div class="result-stat-label">${s.label}</div>`;
+    grid.appendChild(el);
+  });
+  $('#results-coins').textContent = ttRun.coins;
+  $('#results-drop').classList.add('hidden');
+  const rslow = $('#results-slow');
+  const slowList = ttSlowIds();
+  if (slowList.length) {
+    rslow.classList.remove('hidden');
+    rslow.innerHTML =
+      '<div class="slow-list-title">👹 Waiting in the Gauntlet</div><div class="slow-list">' +
+      slowList.slice(0, 12).map(id => { const [x, y] = id.split('x'); return `<span class="slow-chip">${x}×${y}</span>`; }).join('') +
+      (slowList.length > 12 ? '<span class="slow-chip">+' + (slowList.length - 12) + '</span>' : '') +
+      '</div>';
+  } else {
+    rslow.classList.add('hidden');
+  }
+  $('#results-again').onclick = ttRun.retry || (() => nav('tables'));
+  nav('results');
+}
+
+// keypad wiring (table run)
+$$('#tablerun-keypad button').forEach(b => {
+  b.addEventListener('click', () => ttPress(b.dataset.tkey));
+});
+$('#quit-tablerun').addEventListener('click', () => {
+  if (ttRun && !ttRun.finished) { state.coins += ttRun.coins; ttRun.finished = true; saveState(); }
+  nav('tables');
+});
+// physical keyboard support on table run
+document.addEventListener('keydown', (e) => {
+  const active = document.querySelector('.screen.active');
+  if (!active || active.id !== 'screen-tablerun') return;
+  if (e.key >= '0' && e.key <= '9') ttPress(e.key);
+  else if (e.key === 'Backspace') ttPress('del');
+});
 
 refreshAllUI();
 nav('home');

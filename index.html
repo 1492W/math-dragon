@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Uncial+Antiqua&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=phase2c" />
+  <link rel="stylesheet" href="style.css?v=phase3" />
 </head>
 <body>
   <!-- Animated background -->
@@ -47,6 +47,11 @@
           <span class="menu-icon">⚔️</span>
           <span class="menu-title">Train</span>
           <span class="menu-desc">Sharpen your mind</span>
+        </button>
+        <button class="menu-card" data-nav="tables">
+          <span class="menu-icon">✖️</span>
+          <span class="menu-title">Table Trials</span>
+          <span class="menu-desc">Master the times-tables</span>
         </button>
         <button class="menu-card menu-card-primary" data-nav="battle-setup">
           <span class="menu-icon">🏯</span>
@@ -163,6 +168,8 @@
           <div class="drop-card" id="results-drop-card"></div>
         </div>
 
+        <div id="results-slow" class="results-slow hidden"></div>
+
         <div class="results-actions">
           <button class="btn-ghost" data-nav="home">To Lair</button>
           <button class="btn-primary" id="results-again">Again</button>
@@ -278,6 +285,48 @@
       </div>
     </section>
 
+    <!-- ========== TABLE TRIALS (select) ========== -->
+    <section id="screen-tables" class="screen">
+      <header class="screen-header">
+        <button class="back-btn" data-nav="home">‹ Lair</button>
+        <h2>Table Trials</h2>
+        <div class="coins-mini"><span>🪙</span><span id="tables-coins">0</span></div>
+      </header>
+      <div class="section-body">
+        <p class="tables-intro">Pick a dragon rune and master its times-table. Answer fast (under 3s) without stumbling to seal a fact. 🐉</p>
+        <div id="gauntlet-wrap" class="hidden">
+          <h3 class="section-label gauntlet-label">🔥 Dragon's Gauntlet <span class="muted">reclaim the runes that escaped you</span></h3>
+          <div id="gauntlet-grid" class="gauntlet-grid"></div>
+        </div>
+        <h3 class="section-label">Times-tables</h3>
+        <div id="tables-grid" class="rune-grid"></div>
+      </div>
+    </section>
+
+    <!-- ========== TABLE RUN (play) ========== -->
+    <section id="screen-tablerun" class="screen play-screen">
+      <header class="play-header">
+        <button class="quit-btn" id="quit-tablerun">✕</button>
+        <div class="tablerun-titlewrap">
+          <div class="tablerun-title" id="tablerun-title">Trial of ×2</div>
+          <div class="tablerun-prog" id="tablerun-prog">1 / 12</div>
+        </div>
+      </header>
+      <div class="tablerun-tip" id="tablerun-tip"></div>
+      <div class="play-stage">
+        <div id="tablerun-q" class="question"></div>
+        <div id="tablerun-answer" class="battle-answer">&nbsp;</div>
+        <div id="tablerun-feedback" class="feedback"></div>
+        <div id="tablerun-mastery" class="tt-dots"></div>
+      </div>
+      <div class="keypad" id="tablerun-keypad">
+        <button data-tkey="1">1</button><button data-tkey="2">2</button><button data-tkey="3">3</button>
+        <button data-tkey="4">4</button><button data-tkey="5">5</button><button data-tkey="6">6</button>
+        <button data-tkey="7">7</button><button data-tkey="8">8</button><button data-tkey="9">9</button>
+        <button class="key-del" style="visibility:hidden" aria-hidden="true"></button><button data-tkey="0">0</button><button data-tkey="del" class="key-del">⌫</button>
+      </div>
+    </section>
+
   </main>
 
   <!-- ========== MODALS ========== -->
@@ -339,6 +388,6 @@
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <script src="game.js?v=phase2c"></script>
+  <script src="game.js?v=phase3"></script>
 </body>
 </html>

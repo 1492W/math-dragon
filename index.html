@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Uncial+Antiqua&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=phase3b" />
+  <link rel="stylesheet" href="style.css?v=phase4" />
 </head>
 <body>
   <!-- Animated background -->
@@ -52,6 +52,11 @@
           <span class="menu-icon">✖️</span>
           <span class="menu-title">Table Trials</span>
           <span class="menu-desc">Master the times-tables</span>
+        </button>
+        <button class="menu-card" data-nav="forge">
+          <span class="menu-icon">🔨</span>
+          <span class="menu-title">Factor Forge</span>
+          <span class="menu-desc">Break numbers · simplify</span>
         </button>
         <button class="menu-card menu-card-primary" data-nav="battle-setup">
           <span class="menu-icon">🏯</span>
@@ -327,6 +332,65 @@
       </div>
     </section>
 
+    <!-- ========== FACTOR FORGE (select) ========== -->
+    <section id="screen-forge" class="screen">
+      <header class="screen-header">
+        <button class="back-btn" data-nav="home">‹ Lair</button>
+        <h2>Factor Forge</h2>
+        <div class="coins-mini"><span>🪙</span><span id="forge-coins">0</span></div>
+      </header>
+      <div class="section-body">
+        <p class="tables-intro">Break numbers into prime shards, then simplify fractions — the secret to fast division. 🔨</p>
+        <div id="forge-gauntlet-wrap" class="hidden">
+          <h3 class="section-label gauntlet-label">🔥 Forge Gauntlet <span class="muted">redo the ones that slipped</span></h3>
+          <div id="forge-gauntlet-grid" class="gauntlet-grid"></div>
+        </div>
+        <h3 class="section-label">Modes</h3>
+        <div class="forge-modes">
+          <button class="forge-mode" id="forge-mode-shatter">
+            <span class="forge-emoji">💎</span>
+            <span class="forge-body">
+              <span class="forge-title">Prime Shatter</span>
+              <span class="forge-desc">27 → 3 × 3 × 3 · break to prime shards</span>
+            </span>
+            <span class="gauntlet-go">▶</span>
+          </button>
+          <button class="forge-mode" id="forge-mode-simplify">
+            <span class="forge-emoji">✂️</span>
+            <span class="forge-body">
+              <span class="forge-title">Simplify</span>
+              <span class="forge-desc">27/15 → 9/5 · reduce with common factors</span>
+            </span>
+            <span class="gauntlet-go">▶</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== FACTOR FORGE (run) ========== -->
+    <section id="screen-forgerun" class="screen play-screen">
+      <header class="play-header">
+        <button class="quit-btn" id="quit-forgerun">✕</button>
+        <div class="tablerun-titlewrap">
+          <div class="tablerun-title" id="forgerun-title">Prime Shatter</div>
+          <div class="tablerun-prog" id="forgerun-prog">1 / 10</div>
+        </div>
+      </header>
+      <div class="tablerun-tip" id="forgerun-prompt"></div>
+      <div class="play-stage">
+        <div id="forgerun-target" class="forge-target"></div>
+        <div id="forgerun-work" class="forge-work"></div>
+        <div id="forgerun-answer" class="battle-answer">&nbsp;</div>
+        <div id="forgerun-feedback" class="feedback"></div>
+      </div>
+      <div class="keypad" id="forgerun-keypad">
+        <button data-fkey="1">1</button><button data-fkey="2">2</button><button data-fkey="3">3</button>
+        <button data-fkey="4">4</button><button data-fkey="5">5</button><button data-fkey="6">6</button>
+        <button data-fkey="7">7</button><button data-fkey="8">8</button><button data-fkey="9">9</button>
+        <button data-fkey="del" class="key-del">⌫</button><button data-fkey="0">0</button><button data-fkey="ok" class="key-sign">✓</button>
+      </div>
+    </section>
+
   </main>
 
   <!-- ========== MODALS ========== -->
@@ -388,6 +452,6 @@
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <script src="game.js?v=phase3b"></script>
+  <script src="game.js?v=phase4"></script>
 </body>
 </html>

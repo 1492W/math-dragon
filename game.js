@@ -191,7 +191,10 @@ const DEFAULT_STATE = {
   // Facts answered slowly/wrong, collected for focused practice: factId -> 1
   multSlow: {},
   // Best answer time per fact (seconds) — for speed tiers / records
-  multBest: {}
+  multBest: {},
+  // Factor Forge: best time per item, and the slow pile
+  forgeBest: {},
+  forgeSlow: {}
 };
 
 let state = loadState();
@@ -260,6 +263,7 @@ function nav(screen) {
   if (screen === 'hoard') renderHoard();
   if (screen === 'battle-setup') refreshBattleSetup();
   if (screen === 'tables') renderTables();
+  if (screen === 'forge') renderForge();
   window.scrollTo(0, 0);
 }
 
@@ -1737,6 +1741,196 @@ document.addEventListener('keydown', (e) => {
   if (!active || active.id !== 'screen-tablerun') return;
   if (e.key >= '0' && e.key <= '9') ttPress(e.key);
   else if (e.key === 'Backspace') ttPress('del');
+});
+
+/* =====================================================================
+   FACTOR FORGE (phase4) — prime factorization + fraction simplify
+   Isolated. State: forgeBest{key->t}, forgeSlow{key->1}.
+   ===================================================================== */
+const FF_FAST  = { shatter: 9,   simplify: 7   };  // under = fluent (clears)
+const FF_SWIFT = { shatter: 6,   simplify: 4.5 };
+const FF_BLAZE = { shatter: 4,   simplify: 3   };
+const FF_GAUNTLET_SIZE = 6;
+const FF_SHATTER = [12,18,20,24,27,28,30,36,40,42,45,48,50,54,56,60,63,72,75,80,84,90,96,98,99,100];
+const FF_SIMPLIFY = [[27,15],[18,12],[24,36],[20,8],[16,12],[30,45],[14,21],[28,35],[40,24],[12,9],[45,30],[36,48],[50,20],[33,22],[35,14],[60,45],[24,18],[9,6],[15,10],[48,32]];
+
+function ffIsPrime(n){ if(n<2) return false; for(let i=2;i*i<=n;i++) if(n%i===0) return false; return true; }
+function ffGcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=a%b; a=b; b=t; } return a; }
+function ffPrimes(n){ const f=[]; let m=n; for(let p=2;p*p<=m;p++){ while(m%p===0){ f.push(p); m/=p; } } if(m>1) f.push(m); return f; }
+function ffExp(n){ const f=ffPrimes(n), c={}; f.forEach(p=>c[p]=(c[p]||0)+1);
+  return Object.keys(c).map(p=> c[p]>1 ? p+'^'+c[p] : p).join(' × '); }
+function ffKey(it){ return it.mode==='shatter' ? ('s'+it.n) : ('f'+it.a+'/'+it.b); }
+function ffItemFromKey(k){ if(k[0]==='s') return { mode:'shatter', n:parseInt(k.slice(1),10) };
+  const m=k.slice(1).split('/'); return { mode:'simplify', a:parseInt(m[0],10), b:parseInt(m[1],10) }; }
+function ffSlowIds(){ return state.forgeSlow ? Object.keys(state.forgeSlow) : []; }
+function ffMarkSlow(it){ if(!state.forgeSlow) state.forgeSlow={}; state.forgeSlow[ffKey(it)]=1; }
+function ffClearSlow(it){ if(state.forgeSlow) delete state.forgeSlow[ffKey(it)]; }
+function ffRecordBest(it,t){ if(!state.forgeBest) state.forgeBest={}; const k=ffKey(it),p=state.forgeBest[k];
+  if(p==null||t<p){ state.forgeBest[k]=Math.round(t*100)/100; return true; } return false; }
+
+function renderForge(){
+  const c=$('#forge-coins'); if(c) c.textContent=state.coins.toLocaleString();
+  const wrap=$('#forge-gauntlet-wrap'), grid=$('#forge-gauntlet-grid');
+  const ids=ffSlowIds();
+  if(ids.length){
+    wrap.classList.remove('hidden'); grid.innerHTML='';
+    const levels=[]; for(let i=0;i<ids.length;i+=FF_GAUNTLET_SIZE) levels.push(ids.slice(i,i+FF_GAUNTLET_SIZE));
+    levels.forEach((chunk,idx)=>{
+      const btn=document.createElement('button'); btn.className='gauntlet-card';
+      const prev=chunk.slice(0,4).map(k=>{ const it=ffItemFromKey(k); return it.mode==='shatter'?it.n:(it.a+'/'+it.b); }).join('  ');
+      btn.innerHTML=`<span class="gauntlet-emoji">👹</span><span class="gauntlet-body">
+        <span class="gauntlet-title">Forge Gauntlet ${roman(idx+1)}</span>
+        <span class="gauntlet-desc">${chunk.length} item${chunk.length>1?'s':''} · ${prev}${chunk.length>4?' …':''}</span>
+        </span><span class="gauntlet-go">⚔️</span>`;
+      btn.addEventListener('click',()=>startForgeGauntlet(idx));
+      grid.appendChild(btn);
+    });
+  } else wrap.classList.add('hidden');
+}
+
+let ffRun=null;
+function startForge(mode){
+  let items = mode==='shatter'
+    ? FF_SHATTER.slice().sort(()=>Math.random()-0.5).slice(0,10).map(x=>({mode:'shatter',n:x}))
+    : FF_SIMPLIFY.slice().sort(()=>Math.random()-0.5).slice(0,10).map(([a,b])=>({mode:'simplify',a,b}));
+  beginForge({ kind:mode, queue:items, retry:()=>startForge(mode),
+    title: mode==='shatter'?'💎 Prime Shatter':'✂️ Simplify' });
+}
+function startForgeGauntlet(idx){
+  const ids=ffSlowIds(), levels=[];
+  for(let i=0;i<ids.length;i+=FF_GAUNTLET_SIZE) levels.push(ids.slice(i,i+FF_GAUNTLET_SIZE));
+  const chunk=levels[idx];
+  if(!chunk||!chunk.length){ toast('That gauntlet is cleared! 🐉'); nav('forge'); return; }
+  const items=chunk.map(ffItemFromKey).sort(()=>Math.random()-0.5);
+  beginForge({ kind:'gauntlet', queue:items, retry:()=>startForgeGauntlet(idx), title:'👹 Forge Gauntlet '+roman(idx+1) });
+}
+function beginForge(opts){
+  ffRun={ kind:opts.kind, retry:opts.retry, queue:opts.queue, goal:opts.queue.length,
+    cleared:0, coins:0, lightning:0, times:[], finished:false, locked:false, answer:'' };
+  $('#forgerun-title').textContent=opts.title;
+  nav('forgerun'); ffNext();
+}
+function ffNext(){
+  if(!ffRun) return;
+  if(!ffRun.queue.length) return ffFinish();
+  const it=ffRun.queue.shift(); ffRun.cur=it; ffRun.answer=''; ffRun.stumble=false; ffRun.qStart=Date.now();
+  $('#forgerun-prog').textContent=ffRun.cleared+' / '+ffRun.goal;
+  $('#forgerun-answer').textContent='\u00A0'; $('#forgerun-answer').className='battle-answer';
+  $('#forgerun-feedback').textContent=''; $('#forgerun-feedback').className='feedback';
+  $('#forgerun-work').innerHTML='';
+  if(it.mode==='shatter'){
+    it.current=it.n; it.shards=[];
+    $('#forgerun-prompt').textContent='Break into primes — type a prime that divides it';
+    ffRenderShatter();
+  } else {
+    it.ca=it.a; it.cb=it.b;
+    $('#forgerun-prompt').textContent='Simplify — type a number that divides BOTH';
+    ffRenderSimplify();
+  }
+}
+function ffRenderShatter(){
+  const cur=ffRun.cur;
+  $('#forgerun-target').innerHTML=`<span class="ff-num">${cur.current}</span>`;
+  $('#forgerun-work').innerHTML = cur.shards.length
+    ? '<span class="ff-shards">'+cur.shards.map(p=>`<span class="ff-shard">${p}</span>`).join('<span class="ff-x">×</span>')+'</span>'
+    : '<span class="ff-hint">shards will appear here</span>';
+}
+function ffRenderSimplify(){
+  const cur=ffRun.cur;
+  $('#forgerun-target').innerHTML=`<span class="ff-frac"><span class="ff-top">${cur.ca}</span><span class="ff-bar"></span><span class="ff-bot">${cur.cb}</span></span>`;
+}
+function ffPress(key){
+  if(!ffRun||ffRun.finished||ffRun.locked) return;
+  if(key==='del') ffRun.answer=ffRun.answer.slice(0,-1);
+  else if(key==='ok'){ ffSubmit(); return; }
+  else { ffRun.answer+=key; if(ffRun.answer.length>3) ffRun.answer=ffRun.answer.slice(0,3); }
+  $('#forgerun-answer').textContent=ffRun.answer||'\u00A0';
+}
+function ffSubmit(){
+  if(!ffRun||ffRun.finished||ffRun.locked) return;
+  if(ffRun.answer==='') return;
+  const v=parseInt(ffRun.answer,10); if(isNaN(v)) return;
+  const cur=ffRun.cur, fb=$('#forgerun-feedback'), ans=$('#forgerun-answer');
+  const flash=(msg)=>{ fb.textContent=msg; fb.className='feedback show-miss'; ffRun.stumble=true;
+    ffRun.answer=''; $('#forgerun-answer').textContent='\u00A0'; ans.classList.add('wrong'); setTimeout(()=>ans.classList.remove('wrong'),300); };
+  if(cur.mode==='shatter'){
+    if(v>1 && ffIsPrime(v) && cur.current%v===0){
+      cur.shards.push(v); cur.current=cur.current/v; ffRun.answer=''; $('#forgerun-answer').textContent='\u00A0';
+      ffRenderShatter();
+      if(cur.current===1) return ffComplete();
+      fb.textContent='✓ keep going'; fb.className='feedback show-good'; setTimeout(()=>{ if(!ffRun.locked){fb.textContent='';fb.className='feedback';} },500);
+    } else flash( (v<2||!ffIsPrime(v)) ? (v+' is not a prime') : (v+" doesn't divide "+cur.current) );
+  } else {
+    if(v>1 && cur.ca%v===0 && cur.cb%v===0){
+      cur.ca/=v; cur.cb/=v; ffRun.answer=''; $('#forgerun-answer').textContent='\u00A0';
+      ffRenderSimplify();
+      if(ffGcd(cur.ca,cur.cb)===1) return ffComplete();
+      fb.textContent='✓ smaller…'; fb.className='feedback show-good'; setTimeout(()=>{ if(!ffRun.locked){fb.textContent='';fb.className='feedback';} },500);
+    } else flash( v<2 ? 'use a factor bigger than 1' : (v+" doesn't divide both") );
+  }
+}
+function ffComplete(){
+  const cur=ffRun.cur, fb=$('#forgerun-feedback'), ans=$('#forgerun-answer');
+  ffRun.locked=true;
+  const elapsed=(Date.now()-ffRun.qStart)/1000;
+  ffRun.times.push(elapsed); ffRun.cleared++;
+  const kind=cur.mode;
+  const item = kind==='shatter' ? {mode:'shatter',n:cur.n} : {mode:'simplify',a:cur.a,b:cur.b};
+  const record=ffRecordBest(item,elapsed);
+  const B=FF_BLAZE[kind], S=FF_SWIFT[kind], F=FF_FAST[kind];
+  let tier,reward,label;
+  if(!ffRun.stumble && elapsed<B){ tier='blaze'; reward=6; label='⚡ LIGHTNING!'; ffRun.lightning++; }
+  else if(!ffRun.stumble && elapsed<S){ tier='swift'; reward=4; label='⚡ Swift!'; }
+  else if(!ffRun.stumble && elapsed<F){ tier='fast'; reward=3; label='✓ Nice'; }
+  else { tier='slow'; reward=1; label='Done — added to the Gauntlet'; }
+  if(record && tier!=='slow'){ reward+=1; label+=' · Record! 🏅'; }
+  if(ffRun.stumble || elapsed>=F) ffMarkSlow(item); else ffClearSlow(item);
+  ffRun.coins+=reward; state.totalCorrect=(state.totalCorrect||0)+1;
+  if(kind==='shatter') $('#forgerun-target').innerHTML=`<span class="ff-num">${cur.n}</span> <span class="ff-eq">= ${ffExp(cur.n)}</span>`;
+  else $('#forgerun-work').innerHTML=`<span class="ff-done">= ${cur.ca}/${cur.cb}</span>`;
+  ans.classList.add('correct','tier-'+(tier==='slow'?'fast':tier));
+  fb.textContent=label+'  '+elapsed.toFixed(1)+'s  +'+reward+' 🪙';
+  fb.className='feedback '+(tier==='slow'?'show-miss':'show-good');
+  if(tier==='blaze'){ sparkle('⚡'); flashStage('blaze'); } else if(tier==='swift') sparkle('✨');
+  saveState();
+  setTimeout(()=>{ ffRun.locked=false; ffNext(); }, tier==='slow'?1600:1000);
+}
+function ffFinish(){
+  if(!ffRun) return; ffRun.finished=true; ffRun.coins=ffRun.coins||0;
+  const times=ffRun.times.slice();
+  const avg=times.length?(times.reduce((s,t)=>s+t,0)/times.length):null;
+  const fastest=times.length?Math.min(...times):null;
+  const stillSlow=ffSlowIds().length;
+  let bonus=0; if(ffRun.kind==='gauntlet' && stillSlow===0) bonus=40;
+  ffRun.coins+=bonus; state.coins+=ffRun.coins; saveState();
+  $('#results-title').textContent = ffRun.kind==='gauntlet'
+    ? (stillSlow===0?'Forge Gauntlet cleared! 🐉':'👹 Forge Gauntlet')
+    : '🔨 Forge complete';
+  $('#results-sub').textContent = stillSlow + ' items in the Forge Gauntlet';
+  const grid=$('#results-grid'); grid.innerHTML='';
+  [{label:'Avg time',value:avg?avg.toFixed(1)+'s':'—'},
+   {label:'Fastest',value:fastest?fastest.toFixed(1)+'s':'—'},
+   {label:'⚡ Lightning',value:ffRun.lightning||0},
+   {label:'In Gauntlet',value:stillSlow}].forEach(s=>{
+    const el=document.createElement('div'); el.className='result-stat';
+    el.innerHTML=`<div class="result-stat-value">${s.value}</div><div class="result-stat-label">${s.label}</div>`;
+    grid.appendChild(el);
+  });
+  $('#results-coins').textContent=ffRun.coins;
+  $('#results-drop').classList.add('hidden');
+  $('#results-slow') && $('#results-slow').classList.add('hidden');
+  $('#results-again').onclick = ffRun.retry || (()=>nav('forge'));
+  nav('results');
+}
+$('#forge-mode-shatter').addEventListener('click',()=>startForge('shatter'));
+$('#forge-mode-simplify').addEventListener('click',()=>startForge('simplify'));
+$$('#forgerun-keypad button').forEach(b=>b.addEventListener('click',()=>ffPress(b.dataset.fkey)));
+$('#quit-forgerun').addEventListener('click',()=>{ if(ffRun&&!ffRun.finished){ state.coins+=ffRun.coins; ffRun.finished=true; saveState(); } nav('forge'); });
+document.addEventListener('keydown',e=>{
+  const active=document.querySelector('.screen.active'); if(!active||active.id!=='screen-forgerun') return;
+  if(e.key>='0'&&e.key<='9') ffPress(e.key);
+  else if(e.key==='Backspace') ffPress('del');
+  else if(e.key==='Enter') ffPress('ok');
 });
 
 refreshAllUI();

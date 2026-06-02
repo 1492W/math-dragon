@@ -189,7 +189,9 @@ const DEFAULT_STATE = {
   // Times-table trials: factId ("7x8") -> mastery level 0..3
   multFacts: {},
   // Facts answered slowly/wrong, collected for focused practice: factId -> 1
-  multSlow: {}
+  multSlow: {},
+  // Best answer time per fact (seconds) — for speed tiers / records
+  multBest: {}
 };
 
 let state = loadState();
@@ -1417,7 +1419,9 @@ function checkGift() {
    Per-table drill (×2..×12). Mastery stored in state.multFacts ("7x8" -> 0..3).
    ===================================================================== */
 const TT_MASTER = 3;                       // fast+correct answers to master a fact
-const TT_FAST = 3.0;                        // seconds — under this counts as fluent
+const TT_FAST = 3.0;                        // under this counts as fluent (clears)
+const TT_SWIFT = 2.0;                       // speed tier 2
+const TT_BLAZE = 1.5;                       // speed tier 3 (lightning)
 const TT_MAX_ATTEMPTS = 5;                  // safety cap: stop looping one fact forever
 const TT_GAUNTLET_SIZE = 6;                 // facts per Gauntlet level
 const TT_TABLES = [2,3,4,5,6,7,8,9,10,11,12];
@@ -1448,6 +1452,21 @@ function ttMasteredInTable(a) {
 function ttSlowIds() { return state.multSlow ? Object.keys(state.multSlow) : []; }
 function ttMarkSlow(a, b) { if (!state.multSlow) state.multSlow = {}; state.multSlow[ttId(a, b)] = 1; }
 function ttClearSlow(a, b) { if (state.multSlow) delete state.multSlow[ttId(a, b)]; }
+function ttBest(a, b) { return (state.multBest && state.multBest[ttId(a, b)]) || null; }
+function ttRecordBest(a, b, t) {
+  if (!state.multBest) state.multBest = {};
+  const id = ttId(a, b), prev = state.multBest[id];
+  if (prev == null || t < prev) { state.multBest[id] = Math.round(t * 100) / 100; return true; }
+  return false;
+}
+function ttTableBlazing(a) { // all 12 facts mastered AND best < swift
+  for (let b = 1; b <= 12; b++) {
+    if (ttLevel(a, b) < TT_MASTER) return false;
+    const bt = ttBest(a, b);
+    if (bt == null || bt >= TT_SWIFT) return false;
+  }
+  return true;
+}
 // Split the slow pile into ordered Gauntlet levels (stubborn first, deterministic)
 function gauntletLevels() {
   const facts = ttSlowIds().map(id => { const [a, b] = id.split('x').map(Number); return { a, b }; });
@@ -1489,13 +1508,14 @@ function renderTables() {
     const m = ttMasteredInTable(a);
     const pct = Math.round(m / 12 * 100);
     const done = m === 12;
+    const blazing = done && ttTableBlazing(a);
     const card = document.createElement('button');
-    card.className = 'rune-card' + (done ? ' rune-done' : '');
+    card.className = 'rune-card' + (done ? ' rune-done' : '') + (blazing ? ' rune-blaze' : '');
     card.innerHTML = `
       <span class="rune-x">×${a}</span>
       <span class="rune-count">${m}/12</span>
       <span class="rune-bar"><i style="width:${pct}%"></i></span>
-      ${done ? '<span class="rune-seal">🐉</span>' : ''}`;
+      ${blazing ? '<span class="rune-seal">⚡</span>' : (done ? '<span class="rune-seal">🐉</span>' : '')}`;
     card.addEventListener('click', () => startTable(a));
     grid.appendChild(card);
   });
@@ -1527,7 +1547,7 @@ function beginRun(opts) {
     table: opts.table, slow: opts.slow, retry: opts.retry,
     queue: opts.queue, goal: opts.queue.length,
     cleared: 0, correct: 0, attemptsTotal: 0,
-    times: [], attempts: {}, stumbled: {}, finished: false, locked: false, coins: 0
+    times: [], attempts: {}, stumbled: {}, lightning: 0, finished: false, locked: false, coins: 0
   };
   nav('tablerun');
   ttNext();
@@ -1554,6 +1574,12 @@ function ttDrawDots(lvl) {
     s.className = 'tt-dot' + (i < lvl ? ' on' : '');
     d.appendChild(s);
   }
+}
+function flashStage(kind) {
+  const st = document.querySelector('#screen-tablerun .play-stage');
+  if (!st) return;
+  st.classList.add('stage-' + kind);
+  setTimeout(() => st.classList.remove('stage-' + kind), 420);
 }
 function ttPress(key) {
   if (!ttRun || ttRun.finished || ttRun.locked) return;
@@ -1583,19 +1609,27 @@ function ttSubmit() {
   const fast = elapsed < TT_FAST;
 
   if (right) { ttRun.correct++; ttRun.times.push(elapsed); }
+  const record = right ? ttRecordBest(cur.a, cur.b, elapsed) : false;
 
   if (right && fast) {
     // fluent this attempt — clear from the active loop so the run can progress
     ttSetLevel(cur.a, cur.b, ttLevel(cur.a, cur.b) + 1);
-    // graduate from the Gauntlet pile ONLY if it was a clean first try (never stumbled this run)
     if (!ttRun.stumbled[id]) ttClearSlow(cur.a, cur.b);
     else ttMarkSlow(cur.a, cur.b);
     ttRun.cleared++;
-    let reward = 2; ttRun.coins = (ttRun.coins || 0) + reward;
+    // speed tier
+    let tier, reward, label;
+    if (elapsed < TT_BLAZE) { tier = 'blaze'; reward = 5; label = '⚡ LIGHTNING!'; ttRun.lightning = (ttRun.lightning || 0) + 1; }
+    else if (elapsed < TT_SWIFT) { tier = 'swift'; reward = 3; label = '⚡ Swift!'; }
+    else { tier = 'fast'; reward = 2; label = '✓ Fast'; }
+    if (record) { reward += 1; label += ' · Record! 🏅'; }
+    ttRun.coins = (ttRun.coins || 0) + reward;
     state.totalCorrect = (state.totalCorrect || 0) + 1;
-    ans.classList.add('correct');
-    fb.textContent = '⚡ ' + elapsed.toFixed(1) + 's  +' + reward + ' 🪙';
+    ans.classList.add('correct', 'tier-' + tier);
+    fb.textContent = label + '  ' + elapsed.toFixed(1) + 's  +' + reward + ' 🪙';
     fb.className = 'feedback show-good';
+    if (tier === 'blaze') { sparkle('⚡'); flashStage('blaze'); }
+    else if (tier === 'swift') sparkle('✨');
     ttDrawDots(ttLevel(cur.a, cur.b));
     saveState();
     setTimeout(() => { ttRun.locked = false; ttNext(); }, 460);
@@ -1662,7 +1696,7 @@ function ttFinish() {
   const stats = [
     { label: 'Avg speed', value: avg ? avg.toFixed(1) + 's' : '—' },
     { label: 'Fastest', value: fastest ? fastest.toFixed(1) + 's' : '—' },
-    { label: 'Correct', value: ttRun.correct },
+    { label: '⚡ Lightning', value: ttRun.lightning || 0 },
     { label: 'In Gauntlet', value: stillSlow }
   ];
   stats.forEach(s => {

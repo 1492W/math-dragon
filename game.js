@@ -1585,8 +1585,22 @@ function flashStage(kind) {
   st.classList.add('stage-' + kind);
   setTimeout(() => st.classList.remove('stage-' + kind), 420);
 }
+function sparkle(ch) {
+  try {
+    const s = document.createElement('div');
+    s.textContent = ch;
+    s.style.cssText = 'position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);font-size:30px;pointer-events:none;z-index:9999;';
+    document.body.appendChild(s);
+    if (s.animate) s.animate(
+      [{ opacity: 1, transform: 'translate(-50%,-50%) scale(.6)' },
+       { opacity: 0, transform: 'translate(-50%,-150%) scale(1.5)' }],
+      { duration: 900, easing: 'ease-out' });
+    setTimeout(() => s.remove(), 950);
+  } catch (e) {}
+}
 function ttPress(key) {
   if (!ttRun || ttRun.finished || ttRun.locked) return;
+  if (key === 'ok') { clearTimeout(ttPress._t); return ttSubmit(); }
   if (key === 'del') ttRun.answer = ttRun.answer.slice(0, -1);
   else { ttRun.answer += key; if (ttRun.answer.length > 4) ttRun.answer = ttRun.answer.slice(0, 4); }
   $('#tablerun-answer').textContent = ttRun.answer || '\u00A0';
@@ -1741,6 +1755,7 @@ document.addEventListener('keydown', (e) => {
   if (!active || active.id !== 'screen-tablerun') return;
   if (e.key >= '0' && e.key <= '9') ttPress(e.key);
   else if (e.key === 'Backspace') ttPress('del');
+  else if (e.key === 'Enter') ttPress('ok');
 });
 
 /* =====================================================================

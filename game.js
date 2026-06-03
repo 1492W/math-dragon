@@ -1893,18 +1893,27 @@ function ffComplete(){
   const item = kind==='shatter' ? {mode:'shatter',n:cur.n} : {mode:'simplify',a:cur.a,b:cur.b};
   const record=ffRecordBest(item,elapsed);
   const B=FF_BLAZE[kind], S=FF_SWIFT[kind], F=FF_FAST[kind];
-  let tier,reward,label;
-  if(!ffRun.stumble && elapsed<B){ tier='blaze'; reward=6; label='⚡ LIGHTNING!'; ffRun.lightning++; }
-  else if(!ffRun.stumble && elapsed<S){ tier='swift'; reward=4; label='⚡ Swift!'; }
-  else if(!ffRun.stumble && elapsed<F){ tier='fast'; reward=3; label='✓ Nice'; }
-  else { tier='slow'; reward=1; label='Done — added to the Gauntlet'; }
-  if(record && tier!=='slow'){ reward+=1; label+=' · Record! 🏅'; }
+  // effort units = how many steps this problem really took
+  const units = kind==='shatter'
+    ? ffPrimes(cur.n).length                 // e.g. 72 -> 2·2·2·3·3 = 5
+    : Math.max(1, ffPrimes(ffGcd(cur.a,cur.b)).length); // common-factor depth
+  let tier,speedMult,clean=!ffRun.stumble,label;
+  if(clean && elapsed<B){ tier='blaze'; speedMult=1.6; label='⚡ LIGHTNING!'; ffRun.lightning++; }
+  else if(clean && elapsed<S){ tier='swift'; speedMult=1.3; label='⚡ Swift!'; }
+  else if(clean && elapsed<F){ tier='fast'; speedMult=1.0; label='✓ Nice'; }
+  else { tier='slow'; speedMult=0.6; label='Done — added to the Gauntlet'; }
+  // base 3 + 2 per step, scaled by speed, + clean & record bonuses
+  let reward=Math.round((3 + units*2) * speedMult);
+  if(clean) reward+=2;
+  if(record && tier!=='slow'){ reward+=2; label+=' · Record! 🏅'; }
+  reward=Math.max(1,reward);
   if(ffRun.stumble || elapsed>=F) ffMarkSlow(item); else ffClearSlow(item);
   ffRun.coins+=reward; state.totalCorrect=(state.totalCorrect||0)+1;
   if(kind==='shatter') $('#forgerun-target').innerHTML=`<span class="ff-num">${cur.n}</span> <span class="ff-eq">= ${ffExp(cur.n)}</span>`;
   else $('#forgerun-work').innerHTML=`<span class="ff-done">= ${cur.ca}/${cur.cb}</span>`;
   ans.classList.add('correct','tier-'+(tier==='slow'?'fast':tier));
-  fb.textContent=label+'  '+elapsed.toFixed(1)+'s  +'+reward+' 🪙';
+  const stepTxt = kind==='shatter' ? units+' shards' : units+'-step';
+  fb.textContent=label+'  '+stepTxt+'  +'+reward+' 🪙';
   fb.className='feedback '+(tier==='slow'?'show-miss':'show-good');
   if(tier==='blaze'){ sparkle('⚡'); flashStage('blaze'); } else if(tier==='swift') sparkle('✨');
   saveState();

@@ -257,13 +257,14 @@ function saveState() {
 
 /* ============ WORLD OF DRAGONS — tribe bridge (Tower climb) ============ */
 const WORLD_KEY = 'worldofdragons_v1';
+const MILESTONE_SCHEME = 'v2-from100';   // เปลี่ยน scheme → ล้าง math tribe ครั้งเดียว เพื่อ re-reveal ตามชุดใหม่
 const MATH_MILESTONES = [
-  { floor: 90,  id:'math_add',   e:'🐲', name:'Ascendant Wyrm' },
-  { floor: 100, id:'math_sub',   e:'🐉', name:'Centurion Drake' },
-  { floor: 110, id:'math_mul',   e:'🔥', name:'Infernal Climber' },
-  { floor: 120, id:'math_div',   e:'🐊', name:'Apex Leviathan' },
-  { floor: 130, id:'math_speed', e:'💎', name:'Crystalline Sovereign' },
-  { floor: 140, id:'math_king',  e:'👑', name:'Tower King Dragon', legend:true },
+  { floor: 100, id:'math_add',   e:'🐲', name:'Ascendant Wyrm' },
+  { floor: 110, id:'math_sub',   e:'🐉', name:'Centurion Drake' },
+  { floor: 120, id:'math_mul',   e:'🔥', name:'Infernal Climber' },
+  { floor: 130, id:'math_div',   e:'🐊', name:'Apex Leviathan' },
+  { floor: 140, id:'math_speed', e:'💎', name:'Crystalline Sovereign' },
+  { floor: 150, id:'math_king',  e:'👑', name:'Tower King Dragon', legend:true },
 ];
 function awardMathTribe(id){
   try{
@@ -286,6 +287,15 @@ function checkMathMilestone(floor){
 // catch-up: award any already-passed milestones (after restore / approx floor)
 // แสดง reveal ทีละตัวสำหรับมังกรที่ "เพิ่งได้" เพื่อให้พอดีเห็นตอนได้
 function backfillMathTribe(){
+  // milestone scheme เปลี่ยน → ล้าง math tribe ครั้งเดียว เพื่อ re-reveal ตาม floor ใหม่
+  try{
+    const W = JSON.parse(localStorage.getItem(WORLD_KEY) || '{}');
+    if(W.mathScheme !== MILESTONE_SCHEME){
+      W.tribes = W.tribes || {}; W.tribes.math = [];
+      W.mathScheme = MILESTONE_SCHEME; W.updated = Date.now();
+      localStorage.setItem(WORLD_KEY, JSON.stringify(W));
+    }
+  }catch(e){}
   const newly = [];
   MATH_MILESTONES.forEach(m => {
     if((state.highestFloor||1) >= m.floor && awardMathTribe(m.id)) newly.push(m);

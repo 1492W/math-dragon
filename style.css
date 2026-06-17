@@ -23,6 +23,7 @@
   --r-epic: #a66cff;
   --r-legendary: #ffb347;
   --r-mythic: #ff3d7f;
+  --r-divine: #8be9ff;
 
   /* Fonts */
   --f-display: "Cinzel", "Trajan Pro", serif;
@@ -424,6 +425,15 @@ body {
   0%, 100% { box-shadow: 0 0 8px var(--r-mythic); }
   50% { box-shadow: 0 0 18px var(--r-mythic), 0 0 30px var(--r-legendary); }
 }
+.rarity-divine {
+  background: linear-gradient(135deg, #ffd1f5, #c4b5ff, #8be9ff, #b9ffd6);
+  box-shadow: 0 0 12px #b9a8ff;
+  animation: divine-pulse 1.8s ease-in-out infinite;
+}
+@keyframes divine-pulse {
+  0%, 100% { box-shadow: 0 0 10px #b9a8ff; }
+  50% { box-shadow: 0 0 22px #ffd1f5, 0 0 36px #8be9ff; }
+}
 
 /* ---------- Daily dot indicator ---------- */
 .daily-dot {
@@ -587,12 +597,12 @@ body {
 }
 .hoard-row {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(98px, 1fr));
+  gap: 10px;
 }
 .hoard-card {
   aspect-ratio: auto;
-  min-height: 150px;
+  min-height: 138px;
   padding-bottom: 10px;
   position: relative;
 }
@@ -1203,9 +1213,7 @@ body {
 
 /* ---------- Hoard ---------- */
 .hoard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 12px;
+  display: block;
 }
 .hoard-card {
   aspect-ratio: 1 / 1.15;

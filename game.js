@@ -128,7 +128,29 @@ const DRAGONS = {
   void_a:      { id: 'void_a',      name: 'Abyss Sovereign',   emoji: '✨🌀', rarity: 'mythic',   price: 0, ascendedFrom: 'void',      desc: '(Ascended) 2.5× damage, shield x4.', ability: { damageMul: 2.5, shield: 4, streakShield: 2 } },
   cosmos_a:    { id: 'cosmos_a',    name: 'Galactic Overlord', emoji: '✨🌌', rarity: 'mythic',   price: 0, ascendedFrom: 'cosmos',   desc: '(Ascended) +90% dmg, +5s, +125% gold, 50% crit.', ability: { damageMul: 1.9, timeBonus: 5, coinMul: 2.25, critChance: 0.5 } },
   solar_a:     { id: 'solar_a',     name: 'Sun Emperor',       emoji: '✨☀️', rarity: 'mythic',   price: 0, ascendedFrom: 'solar',    desc: '(Ascended) 3× damage, 75% crit, shield x4.', ability: { damageMul: 3.0, critChance: 0.75, shield: 4 } },
-  primordial_a: { id: 'primordial_a', name: 'World Wyrm',      emoji: '✨🌋', rarity: 'mythic',   price: 0, ascendedFrom: 'primordial', desc: '(Ascended) 3× dmg & gold, +8s, 60% crit.', ability: { damageMul: 3.0, coinMul: 3.0, timeBonus: 8, critChance: 0.6 } }
+  primordial_a: { id: 'primordial_a', name: 'World Wyrm',      emoji: '✨🌋', rarity: 'mythic',   price: 0, ascendedFrom: 'primordial', desc: '(Ascended) 3× dmg & gold, +8s, 60% crit.', ability: { damageMul: 3.0, coinMul: 3.0, timeBonus: 8, critChance: 0.6 } },
+  // ----- Divine (radiant top tier) -----
+  aurora: {
+    id: 'aurora', name: 'Aurora Empress', emoji: '🌈',
+    rarity: 'divine', price: 16000,
+    desc: 'Prismatic majesty: 2.4× damage, 2.4× gold, +6s, 45% crit.',
+    ability: { damageMul: 2.4, coinMul: 2.4, timeBonus: 6, critChance: 0.45 }
+  },
+  eclipse: {
+    id: 'eclipse', name: 'Eclipse Deity', emoji: '🌗',
+    rarity: 'divine', price: 22000,
+    desc: 'Devourer of light: 3× damage, shield ×3, 60% crit.',
+    ability: { damageMul: 3.0, shield: 3, critChance: 0.6 }
+  },
+  genesis: {
+    id: 'genesis', name: 'Genesis Dragon', emoji: '🌠',
+    rarity: 'divine', price: 30000,
+    desc: 'Maker of worlds: 3× damage & gold, +8s, 55% crit.',
+    ability: { damageMul: 3.0, coinMul: 3.0, timeBonus: 8, critChance: 0.55 }
+  },
+  aurora_a:  { id: 'aurora_a',  name: 'Aurora Sovereign', emoji: '✨🌈', rarity: 'divine', price: 0, ascendedFrom: 'aurora',  desc: '(Ascended) 3× dmg & gold, +8s, 60% crit.', ability: { damageMul: 3.0, coinMul: 3.0, timeBonus: 8, critChance: 0.6 } },
+  eclipse_a: { id: 'eclipse_a', name: 'Eclipse Overlord', emoji: '✨🌗', rarity: 'divine', price: 0, ascendedFrom: 'eclipse', desc: '(Ascended) 3.5× dmg, shield ×5, 70% crit.', ability: { damageMul: 3.5, shield: 5, critChance: 0.7 } },
+  genesis_a: { id: 'genesis_a', name: 'Genesis Sovereign', emoji: '✨🌠', rarity: 'divine', price: 0, ascendedFrom: 'genesis', desc: '(Ascended) 3.5× dmg & gold, +10s, 65% crit, shield ×3.', ability: { damageMul: 3.5, coinMul: 3.5, timeBonus: 10, critChance: 0.65, shield: 3 } }
 };
 
 const DRAGON_ORDER = [
@@ -136,18 +158,20 @@ const DRAGON_ORDER = [
   'swift','fire','guardian','frost','earth',
   'fortune','crystal','storm','shadow',
   'elder','celestial','void',
-  'cosmos','solar','primordial'
+  'cosmos','solar','primordial',
+  'aurora','eclipse','genesis'
 ];
 
 const ASCENDED_ORDER = [
   'hatchling_a','ember_a','swift_a','fire_a','guardian_a','frost_a','earth_a',
   'fortune_a','crystal_a','storm_a','shadow_a',
   'elder_a','celestial_a','void_a',
-  'cosmos_a','solar_a','primordial_a'
+  'cosmos_a','solar_a','primordial_a',
+  'aurora_a','eclipse_a','genesis_a'
 ];
 
 // Rarity tiers (for sorting, drop weights, egg hatching)
-const RARITY_TIER = { common: 0, rare: 1, epic: 2, legendary: 3, mythic: 4 };
+const RARITY_TIER = { common: 0, rare: 1, epic: 2, legendary: 3, mythic: 4, divine: 5 };
 
 // Egg types
 const EGGS = {
@@ -156,7 +180,9 @@ const EGGS = {
   rare:   { id: 'rare',   name: 'Rare Egg',    emoji: '🟢', price: 900,
             weights: { rare: 0.40, epic: 0.45, legendary: 0.15 } },
   mythic: { id: 'mythic', name: 'Mythic Egg',  emoji: '🟣', price: 2500,
-            weights: { epic: 0.55, legendary: 0.35, mythic: 0.10 } }
+            weights: { epic: 0.55, legendary: 0.35, mythic: 0.10 } },
+  divine: { id: 'divine', name: 'Divine Egg',  emoji: '🔮', price: 6000,
+            weights: { legendary: 0.45, mythic: 0.45, divine: 0.10 } }
 };
 
 // Enemy names by floor tier
@@ -227,6 +253,109 @@ function loadState() {
 
 function saveState() {
   try { localStorage.setItem('dragonMath_v1', JSON.stringify(state)); } catch {}
+}
+
+/* ============ WORLD OF DRAGONS — tribe bridge (Tower climb) ============ */
+const WORLD_KEY = 'worldofdragons_v1';
+const MATH_MILESTONES = [
+  { floor: 90,  id:'math_add',   e:'🐲', name:'Ascendant Wyrm' },
+  { floor: 100, id:'math_sub',   e:'🐉', name:'Centurion Drake' },
+  { floor: 110, id:'math_mul',   e:'🔥', name:'Infernal Climber' },
+  { floor: 120, id:'math_div',   e:'🐊', name:'Apex Leviathan' },
+  { floor: 130, id:'math_speed', e:'💎', name:'Crystalline Sovereign' },
+  { floor: 140, id:'math_king',  e:'👑', name:'Tower King Dragon', legend:true },
+];
+function awardMathTribe(id){
+  try{
+    const W = JSON.parse(localStorage.getItem(WORLD_KEY) || '{}');
+    W.tribes = W.tribes || {}; W.tribes.math = W.tribes.math || [];
+    if(!W.tribes.math.includes(id)){
+      W.tribes.math.push(id); W.updated = Date.now();
+      localStorage.setItem(WORLD_KEY, JSON.stringify(W));
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+// award when a milestone floor is just cleared; returns milestone if newly earned
+function checkMathMilestone(floor){
+  const ms = MATH_MILESTONES.find(m => m.floor === floor);
+  if(ms && awardMathTribe(ms.id)) return ms;
+  return null;
+}
+// catch-up: award any already-passed milestones (after restore / approx floor)
+// แสดง reveal ทีละตัวสำหรับมังกรที่ "เพิ่งได้" เพื่อให้พอดีเห็นตอนได้
+function backfillMathTribe(){
+  const newly = [];
+  MATH_MILESTONES.forEach(m => {
+    if((state.highestFloor||1) >= m.floor && awardMathTribe(m.id)) newly.push(m);
+  });
+  if(newly.length){
+    let i = 0;
+    const showNext = () => {
+      if(i >= newly.length) return;
+      const m = newly[i]; i++;
+      showTribeReveal(m, showNext);
+    };
+    setTimeout(showNext, 1300);   // หลังเกมโหลดเสร็จ ค่อยโชว์ทีละตัว
+  }
+}
+function injectTribeOverlay(){
+  if(document.getElementById('mathTribeRev')) return;
+  const css = document.createElement('style');
+  css.textContent = `
+  #mathTribeRev{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 50% 38%,rgba(60,40,110,.96),rgba(15,10,30,.98));
+    flex-direction:column;text-align:center;padding:24px;font-family:'Cinzel',serif;}
+  #mathTribeRev.show{display:flex;animation:mtFade .4s ease;}
+  @keyframes mtFade{from{opacity:0}to{opacity:1}}
+  #mathTribeRev .mtLabel{color:#ffd86b;font-size:17px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;font-weight:700;}
+  #mathTribeRev .mtDrag{font-size:118px;line-height:1;filter:drop-shadow(0 0 30px rgba(255,200,80,.8));animation:mtPop .6s cubic-bezier(.2,1.6,.4,1);}
+  @keyframes mtPop{0%{transform:scale(0) rotate(-20deg)}100%{transform:scale(1) rotate(0)}}
+  #mathTribeRev .mtName{color:#fff;font-size:29px;font-weight:800;margin:14px 0 6px;text-shadow:0 0 16px rgba(255,180,60,.6);}
+  #mathTribeRev .mtSub{color:#cdbfe8;font-size:15px;font-family:'Cormorant Garamond',serif;font-style:italic;margin-bottom:26px;}
+  #mathTribeRev .mtBtn{background:linear-gradient(180deg,#ffcf5a,#e89b2a);border:none;color:#3a2410;font-family:'Cinzel',serif;
+    font-weight:700;font-size:16px;padding:13px 32px;border-radius:30px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.4);}
+  #mathTribeRev .mtBtn:active{transform:scale(.96);}
+  #mathTribeRev .mtKing .mtDrag{animation:mtPop .6s cubic-bezier(.2,1.6,.4,1),mtGlow 1.6s ease-in-out infinite alternate .6s;}
+  @keyframes mtGlow{from{filter:drop-shadow(0 0 20px rgba(255,200,80,.6))}to{filter:drop-shadow(0 0 52px rgba(255,230,120,1))}}
+  .mtConf{position:fixed;top:-24px;z-index:10000;pointer-events:none;animation:mtFall linear forwards;}
+  @keyframes mtFall{to{transform:translateY(108vh) rotate(540deg);opacity:.2}}
+  `;
+  document.head.appendChild(css);
+  const ov = document.createElement('div');
+  ov.id = 'mathTribeRev';
+  ov.innerHTML = `<div class="mtInner">
+    <div class="mtLabel" id="mtLabel">Tower Floor Conquered</div>
+    <div class="mtDrag" id="mtDrag">🐲</div>
+    <div class="mtName" id="mtName">Dragon</div>
+    <div class="mtSub" id="mtSub">Joined your World of Dragons</div>
+    <button class="mtBtn">Claim \u2728</button>
+  </div>`;
+  document.body.appendChild(ov);
+}
+function mtConfetti(n){
+  const em = ['\u2728','🎉','\u2B50','🔶','💫'];
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div'); c.className='mtConf'; c.textContent=em[i%em.length];
+    c.style.left=Math.random()*100+'vw'; c.style.animationDuration=(1.6+Math.random()*1.4)+'s';
+    c.style.animationDelay=(Math.random()*.4)+'s'; c.style.fontSize=(14+Math.random()*16)+'px';
+    document.body.appendChild(c); setTimeout(()=>c.remove(),3400);
+  }
+}
+function showTribeReveal(ms, onClose){
+  injectTribeOverlay();
+  const ov=document.getElementById('mathTribeRev');
+  document.getElementById('mtDrag').textContent=ms.e;
+  document.getElementById('mtName').textContent=ms.name;
+  document.getElementById('mtLabel').textContent= ms.legend ? '👑 TOWER MASTER!' : '\u2694\uFE0F Tower Floor '+ms.floor+' Conquered';
+  document.getElementById('mtSub').textContent= ms.legend ? 'Pordee rules the Math Tribe!' : 'Joined your World of Dragons';
+  ov.querySelector('.mtInner').classList.toggle('mtKing', !!ms.legend);
+  ov.classList.add('show');
+  mtConfetti(ms.legend?90:55);
+  if(ms.legend) setTimeout(()=>mtConfetti(70),650);
+  // ปุ่ม Claim → ปิด + เรียกตัวถัดไป (ถ้ามี chain)
+  ov.querySelector('.mtBtn').onclick = () => { ov.classList.remove('show'); if(onClose) setTimeout(onClose, 420); };
 }
 
 function resetState() {
@@ -1067,7 +1196,9 @@ function winBattle() {
     state.dragons[dropped] = (state.dragons[dropped] || 0) + 1;
   }
   saveState();
+  const _ms = checkMathMilestone(battle.floor);
   showBattleResults({ win: true, dropped, freeEgg });
+  if(_ms) setTimeout(()=>showTribeReveal(_ms), 1100);
 }
 
 // Drop pool weighted toward listed rarities
@@ -1962,3 +2093,5 @@ nav('home');
 checkGift();
 // Show daily bonus if available
 setTimeout(maybeShowDaily, 300);
+injectTribeOverlay();
+backfillMathTribe();
